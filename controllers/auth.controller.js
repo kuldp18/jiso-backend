@@ -161,3 +161,26 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const logout = async (req, res) => {
+  try {
+    // Clear both tokens from cookies
+    res.clearCookie("token");
+    res.clearCookie("refreshToken");
+
+    // Clear refresh token from database if user is authenticated
+    if (req.userId) {
+      await User.findByIdAndUpdate(req.userId, {
+        refreshToken: null,
+        refreshTokenExpiresAt: null,
+      });
+    }
+
+    res.status(200).json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong during logout.",
+    });
+  }
+};
