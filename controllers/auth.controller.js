@@ -101,6 +101,21 @@ export const login = async (req, res) => {
       });
     }
 
+    // check if the user is already logged in
+    const userRefreshToken = req.cookies?.refreshToken;
+    if (userRefreshToken) {
+      const decoded = jwt.verify(
+        userRefreshToken,
+        process.env.JWT_REFRESH_SECRET
+      );
+      if (decoded) {
+        return res.status(400).json({
+          success: "false",
+          message: "You are already logged in",
+        });
+      }
+    }
+
     // check is password is valid
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
