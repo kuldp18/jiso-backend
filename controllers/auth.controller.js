@@ -36,7 +36,7 @@ export const signup = async (req, res) => {
     // create new user and save
     const user = new User({
       email,
-      password,
+      password: hashedPassword,
       name,
       gender: gender || null,
       age: age || null,
@@ -55,11 +55,13 @@ export const signup = async (req, res) => {
     user.refreshToken = refreshToken;
     user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
+    user.lastLogin = new Date();
+
     await user.save();
 
     // TODO : send verification email here
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "User created successfully",
       user: {
@@ -71,11 +73,76 @@ export const signup = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-export const login = async (req, res) => {};
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    if (!email || !password) {
+      return res.status(400).json({
+        success: "false",
+        message: "Please provide your email and password to login.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    // if no user found with email, then stop
+    if (!user) {
+      return res.status(404).json({
+        success: "false",
+        message: "Invalid credentials or user not found",
+      });
+    }
+
+    // check is password is valid
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(403).json({
+        success: false,
+        message: "Invalid email or password provided",
+      });
+    }
+
+    // generate tokens
+    generateTokenAndSetCookie(res, user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    // save refresh token to user
+    user.refreshToken = refreshToken;
+    user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    user.lastLogin = new Date();
+
+    // set refresh token
+    setRefreshTokenCookie(res, refreshToken);
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        gender: user.gender,
+        age: user.age,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message:
+        "Something went wrong while logging you in. Please try again later.",
+    });
+  }
+};
