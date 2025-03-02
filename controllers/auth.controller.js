@@ -186,3 +186,75 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+export const verifyEmail = async (req, res) => {
+  const { code, email } = req.body;
+
+  if (!code || !email) {
+    return res.status(400).json({
+      success: false,
+      message: "An email and a code are required",
+    });
+  }
+
+  try {
+    const user = await User.findOne({
+      email: email,
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // check if user is already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Your email is already verified",
+      });
+    }
+
+    // Validate verification code and expiration time
+    if (
+      user.emailVerificationToken !== code ||
+      user.emailVerificationTokenExpiresAt <= Date.now()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired email verification code",
+      });
+    }
+
+    // verify the user identity
+    user.isEmailVerified = true;
+
+    // clear email verification info
+    user.emailVerificationToken = undefined;
+    user.emailVerificationTokenExpiresAt = undefined;
+
+    // save the user object
+    await user.save();
+
+    // TODO : send a welcome email (optional)
+
+    res.status(200).json({
+      success: true,
+      message: "Your email has been verified",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        verified: user.isEmailVerified,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        "Something went wrong while verifying your email. Please try again later.",
+    });
+  }
+};
