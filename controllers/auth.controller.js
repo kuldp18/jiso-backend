@@ -9,6 +9,7 @@ import {
   generateTokenAndSetCookie,
   setRefreshTokenCookie,
 } from "../utils/auth.utils.js";
+import { sendEmailVerificationEmail } from "../mailersend/mails.js";
 
 export const signup = async (req, res) => {
   const { name, email, password, gender, age } = req.body;
@@ -59,7 +60,8 @@ export const signup = async (req, res) => {
 
     await user.save();
 
-    // TODO : send verification email here
+    // send verification email
+    await sendEmailVerificationEmail(user);
 
     return res.status(201).json({
       success: true,
