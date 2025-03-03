@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { User } from "../models/user.model.js";
 
 export const verifyToken = (req, res, next) => {
   const token = req.cookies?.token;
@@ -25,6 +26,34 @@ export const verifyToken = (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: "Server error during authentication check",
+    });
+  }
+};
+
+export const requireVerifiedEmail = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Please verify your email address before accessing this resource",
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error during verification check",
     });
   }
 };
