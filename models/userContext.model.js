@@ -10,7 +10,10 @@ const userContextSchema = new mongoose.Schema(
 
     goals: [
       {
-        title: String,
+        goal: {
+          type: String,
+          required: true,
+        },
         description: String,
         createdAt: { type: Date, default: Date.now },
         completed: { type: Date, default: false },
@@ -28,15 +31,27 @@ const userContextSchema = new mongoose.Schema(
     moodThemes: {
       weekly: [
         {
-          weekStart: Date, // Start of the week (e.g., Monday)
-          theme: String, // Example: "Anxious", "Hopeful"
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          theme: {
+            type: String, // Example: "Anxious", "Hopeful"
+            required: true,
+          },
           description: String,
         },
       ],
       monthly: [
         {
-          month: String, // Example: "February 2025"
-          theme: String, // Example: "Resilience", "Depressed"
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          theme: {
+            type: String, // Example: "Anxious", "Hopeful"
+            required: true,
+          },
           description: String,
         },
       ],
@@ -45,15 +60,27 @@ const userContextSchema = new mongoose.Schema(
     journalThemes: {
       weekly: [
         {
-          weekStart: Date, // Start of the week (e.g., Monday)
-          theme: String,
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          theme: {
+            type: String, // Example: "Anxious", "Hopeful"
+            required: true,
+          },
           description: String,
         },
       ],
       monthly: [
         {
-          month: String, // Example: "February 2025"
-          theme: String,
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          theme: {
+            type: String, // Example: "Anxious", "Hopeful"
+            required: true,
+          },
           description: String,
         },
       ],
