@@ -9,7 +9,10 @@ import {
   generateTokenAndSetCookie,
   setRefreshTokenCookie,
 } from "../utils/auth.utils.js";
-import { sendEmailVerificationEmail } from "../mailersend/mails.js";
+import {
+  sendEmailVerificationEmail,
+  sendPasswordResetEmail,
+} from "../mailersend/mails.js";
 
 export const signup = async (req, res) => {
   const { name, email, password, gender, age } = req.body;
@@ -255,6 +258,60 @@ export const verifyEmail = async (req, res) => {
       success: false,
       message:
         "Something went wrong while verifying your email. Please try again later.",
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "We cannot find the user with the provided email. Please recheck the email or try again later.",
+      });
+    }
+
+    // if we have existing valid token, skip sending email again
+
+    if (
+      user.resetPasswordToken &&
+      user.resetPasswordTokenExpiresAt > Date.now()
+    ) {
+      return res.status(200).json({
+        success: true,
+        message:
+          "We have already sent you a password reset link. Please check your email.",
+      });
+    }
+
+    //generate password reset token
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; //after 1hr
+
+    // add reset token to user object
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordTokenExpiresAt = resetTokenExpiresAt;
+
+    // save user
+    await user.save();
+
+    // send password reset email
+
+    await sendPasswordResetEmail(user, resetToken);
+
+    res.status(200).json({
+      success: true,
+      message: "A password reset link has been sent to your email.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        "Something went wrong while doing the forgot-password operation. Please try again later.",
     });
   }
 };
