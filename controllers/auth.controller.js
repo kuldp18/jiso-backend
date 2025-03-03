@@ -315,3 +315,50 @@ export const forgotPassword = async (req, res) => {
     });
   }
 };
+
+export const resetPassword = async (req, res) => {
+  const { newPassword } = req.body;
+  const { token } = req.params;
+
+  if (!newPassword || !token) {
+    return res.status(400).json({
+      success: false,
+      message: "A new password is required with the reset token",
+    });
+  }
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordTokenExpiresAt: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    // update the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpiresAt = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Your password has been reset successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        "Something went wrong while resetting your password. Please try again later.",
+    });
+  }
+};
