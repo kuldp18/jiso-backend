@@ -362,3 +362,62 @@ export const resetPassword = async (req, res) => {
     });
   }
 };
+
+export const refreshToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token not found",
+      });
+    }
+
+    // verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Find user and check if refresh token matches
+    const user = await User.findOne({
+      _id: decoded.userId,
+      refreshToken: refreshToken,
+      refreshTokenExpiresAt: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid refresh token",
+      });
+    }
+
+    // Generate new access token and refresh token
+    generateTokenAndSetCookie(res, user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
+
+    // Update user with new refresh token
+    user.refreshToken = newRefreshToken;
+    user.refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    // Set new refresh token cookie
+    setRefreshTokenCookie(res, newRefreshToken);
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Access token refreshed successfully",
+    });
+  } catch (error) {
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid refresh token",
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: "Error refreshing access token",
+    });
+  }
+};
