@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import {
+  addGoal,
   createJournalTheme,
   createMoodTheme,
   createUserContext,
+  getGoals,
   getUserContext,
 } from "../controllers/userContext.controller.js";
 
@@ -11,14 +13,16 @@ const router = Router();
 
 router.use(verifyToken);
 
-// Create user context
+// User context
 router.post("/create", createUserContext);
-// Get user context
 router.get("/", getUserContext);
 
-// Create journal theme
+// Goals
+router.post("/goal/add", addGoal);
+router.get("/goals", getGoals);
+
+// Create journal and mood themes (for AI)
 router.post("/ai/theme/journal", createJournalTheme);
-// Create mood theme
 router.post("/ai/theme/mood", createMoodTheme);
 
 export default router;

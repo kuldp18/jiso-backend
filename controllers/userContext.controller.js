@@ -1,5 +1,8 @@
 import { UserContext } from "../models/usercontext.model.js";
 
+// USER CONTEXT
+
+// create new user context
 export const createUserContext = async (req, res) => {
   const { goals, struggles } = req.body;
 
@@ -54,6 +57,7 @@ export const createUserContext = async (req, res) => {
   }
 };
 
+// get user context
 export const getUserContext = async (req, res) => {
   try {
     const userContext = await UserContext.findOne({ userId: req.userId });
@@ -78,8 +82,81 @@ export const getUserContext = async (req, res) => {
   }
 };
 
-// For AI
+// GOALS
 
+// add a new goal
+export const addGoal = async (req, res) => {
+  let { goal, description } = req.body;
+
+  try {
+    if (!goal) {
+      return res.status(400).json({
+        success: false,
+        message: "A goal is required",
+      });
+    }
+
+    if (!description) {
+      description = "";
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    userContext.goals.push({ goal, description });
+
+    const savedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "New goal added in the user context",
+      context: savedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while adding new goal in the user context",
+    });
+  }
+};
+
+// fetch all goals
+export const getGoals = async (req, res) => {
+  try {
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      messages: "User goals found successfully",
+      contextId: userContext._id,
+      goals: userContext.goals,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while fetching user goals",
+    });
+  }
+};
+
+// For AI
+// create journal theme (weekly or monthly)
 export const createJournalTheme = async (req, res) => {
   let { type, theme, description } = req.body;
 
@@ -129,6 +206,7 @@ export const createJournalTheme = async (req, res) => {
   }
 };
 
+// create mood theme (weekly or monthly)
 export const createMoodTheme = async (req, res) => {
   let { type, theme, description } = req.body;
 
@@ -160,7 +238,7 @@ export const createMoodTheme = async (req, res) => {
       });
     }
 
-    //   create and save journal theme
+    //   create and save mood theme
     userContext.moodThemes[type].push({ theme, description });
     const updatedContext = await userContext.save();
 
