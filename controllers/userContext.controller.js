@@ -96,10 +96,6 @@ export const addGoal = async (req, res) => {
       });
     }
 
-    if (!description) {
-      description = "";
-    }
-
     const userContext = await UserContext.findOne({ userId: req.userId });
 
     if (!userContext) {
@@ -124,6 +120,57 @@ export const addGoal = async (req, res) => {
       message:
         error.message ||
         "Something went wrong while adding new goal in the user context",
+    });
+  }
+};
+
+// add new goals as array: [item1,item2...]
+export const addGoals = async (req, res) => {
+  let { newGoals } = req.body;
+
+  try {
+    if (!newGoals || newGoals.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide a `newGoals` array with at least one goal item",
+      });
+    }
+
+    if (!Array.isArray(newGoals)) {
+      return res.status(400).json({
+        success: false,
+        message: "`newGoals` should be an array of goal items",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    //   merge goals
+    const updatedGoals = [...userContext.goals, ...newGoals];
+    userContext.goals = updatedGoals;
+
+    //   save context
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Goals updated successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while add new goals in the user context",
     });
   }
 };

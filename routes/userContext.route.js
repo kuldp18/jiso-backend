@@ -2,6 +2,7 @@ import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import {
   addGoal,
+  addGoals,
   createJournalTheme,
   createMoodTheme,
   createUserContext,
@@ -18,7 +19,8 @@ router.post("/create", createUserContext);
 router.get("/", getUserContext);
 
 // Goals
-router.post("/goal/add", addGoal);
+router.post("/goal/add", addGoal); // add single goal
+router.post("/goals/add", addGoals); // add multiple goals as array
 router.get("/goals", getGoals);
 
 // Create journal and mood themes (for AI)
