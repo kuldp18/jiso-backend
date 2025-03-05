@@ -8,82 +8,116 @@ const userContextSchema = new mongoose.Schema(
       required: true,
     },
 
-    goals: [
-      {
-        goal: {
-          type: String,
-          required: true,
-        },
-        description: String,
-        createdAt: { type: Date, default: Date.now },
-        completed: { type: Date, default: false },
-      },
-    ],
-
-    struggles: [
-      {
-        description: String,
-        severity: { type: Number, min: 1, max: 10 },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
-
-    moodThemes: {
-      weekly: [
+    goals: {
+      type: [
         {
-          date: {
-            type: Date,
-            default: Date.now,
-          },
-          theme: {
-            type: String, // Example: "Anxious", "Hopeful"
+          goal: {
+            type: String,
             required: true,
           },
           description: String,
+          createdAt: { type: Date, default: Date.now },
+          completed: { type: Boolean, default: false },
         },
       ],
-      monthly: [
-        {
-          date: {
-            type: Date,
-            default: Date.now,
-          },
-          theme: {
-            type: String, // Example: "Anxious", "Hopeful"
-            required: true,
-          },
-          description: String,
-        },
+      validate: [
+        (arr) => arr.length > 0,
+        "Please fill in at least on of your goals",
       ],
     },
 
+    struggles: {
+      type: [
+        {
+          struggle: {
+            type: String,
+            required: true,
+          },
+          description: String,
+          severity: { type: Number, min: 0, max: 10 },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      validate: [
+        (arr) => arr.length > 0,
+        "Please fill in at least one of your struggles",
+      ],
+    },
+
+    moodThemes: {
+      type: {
+        weekly: {
+          type: [
+            {
+              date: {
+                type: Date,
+                default: Date.now,
+              },
+              theme: {
+                type: String,
+                required: true,
+              },
+              description: String,
+            },
+          ],
+          default: [], // Initialize as empty array
+        },
+        monthly: {
+          type: [
+            {
+              date: {
+                type: Date,
+                default: Date.now,
+              },
+              theme: {
+                type: String,
+                required: true,
+              },
+              description: String,
+            },
+          ],
+          default: [], // Initialize as empty array
+        },
+      },
+      default: { weekly: [], monthly: [] }, // Initialize as empty object with arrays
+    },
+
     journalThemes: {
-      weekly: [
-        {
-          date: {
-            type: Date,
-            default: Date.now,
-          },
-          theme: {
-            type: String, // Example: "Anxious", "Hopeful"
-            required: true,
-          },
-          description: String,
+      type: {
+        weekly: {
+          type: [
+            {
+              date: {
+                type: Date,
+                default: Date.now,
+              },
+              theme: {
+                type: String,
+                required: true,
+              },
+              description: String,
+            },
+          ],
+          default: [], // Initialize as empty array
         },
-      ],
-      monthly: [
-        {
-          date: {
-            type: Date,
-            default: Date.now,
-          },
-          theme: {
-            type: String, // Example: "Anxious", "Hopeful"
-            required: true,
-          },
-          description: String,
+        monthly: {
+          type: [
+            {
+              date: {
+                type: Date,
+                default: Date.now,
+              },
+              theme: {
+                type: String,
+                required: true,
+              },
+              description: String,
+            },
+          ],
+          default: [], // Initialize as empty array
         },
-      ],
+      },
+      default: { weekly: [], monthly: [] }, // Initialize as empty object with arrays
     },
   },
   { timestamps: true }
