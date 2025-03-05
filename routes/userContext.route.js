@@ -7,6 +7,7 @@ import {
   createMoodTheme,
   createUserContext,
   getGoals,
+  getSingleGoal,
   getUserContext,
 } from "../controllers/userContext.controller.js";
 
@@ -21,7 +22,8 @@ router.get("/", getUserContext);
 // Goals
 router.post("/goal/add", addGoal); // add single goal
 router.post("/goals/add", addGoals); // add multiple goals as array
-router.get("/goals", getGoals);
+router.get("/goals", getGoals); // fetch all goals
+router.get("/goal/:goalId", getSingleGoal); // fetch single goal
 
 // Create journal and mood themes (for AI)
 router.post("/ai/theme/journal", createJournalTheme);

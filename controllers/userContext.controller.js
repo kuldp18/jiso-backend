@@ -202,6 +202,61 @@ export const getGoals = async (req, res) => {
   }
 };
 
+// fetch single goal
+export const getSingleGoal = async (req, res) => {
+  const { goalId } = req.params;
+
+  try {
+    if (!goalId) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide a goal id in the url",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    const userGoals = userContext.goals;
+
+    const goals = userGoals.filter(
+      (userGoal) => userGoal._id.toString() === goalId
+    );
+
+    if (goals.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Goal not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Goal found",
+      result: goals[0],
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while fetching your goal",
+    });
+  }
+};
+
+// delete all goals
+
+// delete single goal
+
+// toggle goal completion
+
+// edit goal
+
 // For AI
 // create journal theme (weekly or monthly)
 export const createJournalTheme = async (req, res) => {
