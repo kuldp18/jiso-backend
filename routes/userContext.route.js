@@ -8,6 +8,7 @@ import {
   createUserContext,
   deleteAllGoals,
   deleteSingleGoal,
+  editGoal,
   getGoals,
   getSingleGoal,
   getUserContext,
@@ -29,7 +30,8 @@ router.get("/goals", getGoals); // fetch all goals
 router.delete("/goals", deleteAllGoals); // delete all goals
 router.get("/goal/:goalId", getSingleGoal); // fetch single goal
 router.delete("/goal/:goalId", deleteSingleGoal); // delete single goal
-router.patch("/goal/:goalId", toggleGoalCompletion); // toggle completed property
+router.patch("/goal/toggle/:goalId", toggleGoalCompletion); // toggle completed property
+router.patch("/goal/edit/:goalId", editGoal); // edit goal
 
 // Create journal and mood themes (for AI)
 router.post("/ai/theme/journal", createJournalTheme);

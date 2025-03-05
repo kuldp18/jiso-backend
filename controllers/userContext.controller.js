@@ -401,6 +401,56 @@ export const toggleGoalCompletion = async (req, res) => {
 };
 
 // edit goal
+export const editGoal = async (req, res) => {
+  const { newGoal } = req.body;
+  const { goalId } = req.params;
+
+  try {
+    if (!goalId || !newGoal) {
+      return res.status(400).json({
+        success: false,
+        message: "goalId and a new goal are required to update a goal",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    // check if goal id exists
+    const goalIndex = userContext.goals.findIndex(
+      (userGoal) => userGoal._id.toString() === goalId
+    );
+
+    if (goalIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid goal id or goal not found",
+      });
+    }
+
+    // update goal
+
+    userContext.goals[goalIndex].goal = newGoal;
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Goal updated successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while updating this goal",
+    });
+  }
+};
 
 // For AI
 // create journal theme (weekly or monthly)
