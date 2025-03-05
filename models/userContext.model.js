@@ -30,7 +30,7 @@ const userContextSchema = new mongoose.Schema(
             required: true,
           },
           description: String,
-          severity: { type: Number, min: 0, max: 10, default: -1 },
+          severity: { type: Number, min: -1, max: 10, default: -1 },
           createdAt: { type: Date, default: Date.now },
         },
       ],

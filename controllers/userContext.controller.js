@@ -324,7 +324,7 @@ export const deleteSingleGoal = async (req, res) => {
     if (goalIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: "Goal not found",
+        message: "Invalid goal id or goal not found",
       });
     }
 
@@ -348,6 +348,57 @@ export const deleteSingleGoal = async (req, res) => {
 };
 
 // toggle goal completion
+export const toggleGoalCompletion = async (req, res) => {
+  const { goalId } = req.params;
+  try {
+    if (!goalId) {
+      return res.status(400).json({
+        success: false,
+        message: "Goal id is required to toggle",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    const userGoals = userContext.goals;
+
+    const goalIndex = userGoals.findIndex(
+      (userGoal) => userGoal._id.toString() === goalId
+    );
+
+    if (goalIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid goal id or goal not found",
+      });
+    }
+
+    // toggle goal
+
+    userContext.goals[goalIndex].completed =
+      !userContext.goals[goalIndex].completed;
+
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Goal toggled successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while toggling this goal",
+    });
+  }
+};
 
 // edit goal
 

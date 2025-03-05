@@ -11,6 +11,7 @@ import {
   getGoals,
   getSingleGoal,
   getUserContext,
+  toggleGoalCompletion,
 } from "../controllers/userContext.controller.js";
 
 const router = Router();
@@ -28,6 +29,7 @@ router.get("/goals", getGoals); // fetch all goals
 router.delete("/goals", deleteAllGoals); // delete all goals
 router.get("/goal/:goalId", getSingleGoal); // fetch single goal
 router.delete("/goal/:goalId", deleteSingleGoal); // delete single goal
+router.patch("/goal/:goalId", toggleGoalCompletion); // toggle completed property
 
 // Create journal and mood themes (for AI)
 router.post("/ai/theme/journal", createJournalTheme);
