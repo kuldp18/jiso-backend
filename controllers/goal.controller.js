@@ -1,0 +1,369 @@
+import { UserContext } from "../models/userContext.model.js";
+
+// add a new goal
+export const addGoal = async (req, res) => {
+  let { goal, description } = req.body;
+
+  try {
+    if (!goal) {
+      return res.status(400).json({
+        success: false,
+        message: "A goal is required",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    userContext.goals.push({ goal, description });
+
+    const savedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "New goal added in the user context",
+      context: savedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while adding new goal in the user context",
+    });
+  }
+};
+
+// add new goals as array: [item1,item2...]
+export const addGoals = async (req, res) => {
+  let { newGoals } = req.body;
+
+  try {
+    if (!newGoals || newGoals.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide a `newGoals` array with at least one goal item",
+      });
+    }
+
+    if (!Array.isArray(newGoals)) {
+      return res.status(400).json({
+        success: false,
+        message: "`newGoals` should be an array of goal items",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    //   merge goals
+    const updatedGoals = [...userContext.goals, ...newGoals];
+    userContext.goals = updatedGoals;
+
+    //   save context
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Goals updated successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while add new goals in the user context",
+    });
+  }
+};
+
+// fetch all goals
+export const getGoals = async (req, res) => {
+  try {
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    if (userContext.goals.length === 0) {
+      return res.status(200).json({
+        success: true,
+        messages: "No goals found",
+        contextId: userContext._id,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      messages: "User goals found successfully",
+      contextId: userContext._id,
+      goals: userContext.goals,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while fetching user goals",
+    });
+  }
+};
+
+// fetch single goal
+export const getSingleGoal = async (req, res) => {
+  const { goalId } = req.params;
+
+  try {
+    if (!goalId) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide a goal id in the url",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    const userGoals = userContext.goals;
+
+    const goals = userGoals.filter(
+      (userGoal) => userGoal._id.toString() === goalId
+    );
+
+    if (goals.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Goal not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Goal found",
+      result: goals[0],
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while fetching your goal",
+    });
+  }
+};
+
+// delete all goals
+
+export const deleteAllGoals = async (req, res) => {
+  try {
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    if (userContext.goals.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Goals are already empty",
+      });
+    }
+
+    userContext.goals = [];
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "All goals have been deleted successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while deleting all the goals",
+    });
+  }
+};
+
+// delete single goal
+export const deleteSingleGoal = async (req, res) => {
+  const { goalId } = req.params;
+  try {
+    if (!goalId) {
+      return res.status(400).json({
+        success: false,
+        message: "Goal id is required to delete",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    const userGoals = userContext.goals;
+
+    const goalIndex = userGoals.findIndex(
+      (userGoal) => userGoal._id.toString() === goalId
+    );
+
+    // Check if goal exists
+    if (goalIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid goal id or goal not found",
+      });
+    }
+
+    // Remove the goal using splice
+    userContext.goals.splice(goalIndex, 1);
+
+    // Save the updated context
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Goal deleted successfully from the context",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while deleting this goal",
+    });
+  }
+};
+
+// toggle goal completion
+export const toggleGoalCompletion = async (req, res) => {
+  const { goalId } = req.params;
+  try {
+    if (!goalId) {
+      return res.status(400).json({
+        success: false,
+        message: "Goal id is required to toggle",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    const userGoals = userContext.goals;
+
+    const goalIndex = userGoals.findIndex(
+      (userGoal) => userGoal._id.toString() === goalId
+    );
+
+    if (goalIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid goal id or goal not found",
+      });
+    }
+
+    // toggle goal
+
+    userContext.goals[goalIndex].completed =
+      !userContext.goals[goalIndex].completed;
+
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Goal toggled successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while toggling this goal",
+    });
+  }
+};
+
+// edit goal
+export const editGoal = async (req, res) => {
+  const { newGoal } = req.body;
+  const { goalId } = req.params;
+
+  try {
+    if (!goalId || !newGoal) {
+      return res.status(400).json({
+        success: false,
+        message: "goalId and a new goal are required to update a goal",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    // check if goal id exists
+    const goalIndex = userContext.goals.findIndex(
+      (userGoal) => userGoal._id.toString() === goalId
+    );
+
+    if (goalIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid goal id or goal not found",
+      });
+    }
+
+    // update goal
+
+    userContext.goals[goalIndex].goal = newGoal;
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Goal updated successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while updating this goal",
+    });
+  }
+};

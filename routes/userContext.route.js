@@ -1,19 +1,22 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import {
-  addGoal,
-  addGoals,
   createJournalTheme,
   createMoodTheme,
   createUserContext,
-  deleteAllGoals,
-  deleteSingleGoal,
-  editGoal,
-  getGoals,
-  getSingleGoal,
   getUserContext,
-  toggleGoalCompletion,
 } from "../controllers/userContext.controller.js";
+
+import {
+  addGoal,
+  addGoals,
+  getGoals,
+  deleteAllGoals,
+  getSingleGoal,
+  deleteSingleGoal,
+  toggleGoalCompletion,
+  editGoal,
+} from "../controllers/goal.controller.js";
 
 const router = Router();
 
