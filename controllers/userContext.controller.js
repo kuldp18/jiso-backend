@@ -77,3 +77,56 @@ export const getUserContext = async (req, res) => {
     });
   }
 };
+
+// For AI
+
+export const createJournalTheme = async (req, res) => {
+  let { type, theme, description } = req.body;
+
+  try {
+    if (!type || !theme) {
+      return res.status(400).json({
+        success: false,
+        message: "A theme, type and description(optional) are required",
+      });
+    }
+
+    if (type !== "weekly" && type !== "monthly") {
+      return res.status(400).json({
+        success: false,
+        message: "Theme type should only be: weekly or monthly",
+      });
+    }
+
+    if (!description) {
+      description = "";
+    }
+
+    let userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "No context found for this user",
+      });
+    }
+
+    //   create and save journal theme
+    userContext.journalThemes[type].push({ theme, description });
+    const updatedContext = await userContext.save();
+
+    res.status(201).json({
+      success: true,
+      message: `${type} journal theme created successfully`,
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while creating journal theme",
+    });
+  }
+};
+
+export const createMoodTheme = async (req, res) => {};
