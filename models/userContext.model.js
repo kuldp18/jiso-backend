@@ -20,10 +20,6 @@ const userContextSchema = new mongoose.Schema(
           completed: { type: Boolean, default: false },
         },
       ],
-      validate: [
-        (arr) => arr.length > 0,
-        "Please fill in at least on of your goals",
-      ],
     },
 
     struggles: {
@@ -37,10 +33,6 @@ const userContextSchema = new mongoose.Schema(
           severity: { type: Number, min: 0, max: 10 },
           createdAt: { type: Date, default: Date.now },
         },
-      ],
-      validate: [
-        (arr) => arr.length > 0,
-        "Please fill in at least one of your struggles",
       ],
     },
 

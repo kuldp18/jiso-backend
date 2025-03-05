@@ -6,6 +6,7 @@ import {
   createJournalTheme,
   createMoodTheme,
   createUserContext,
+  deleteAllGoals,
   getGoals,
   getSingleGoal,
   getUserContext,
@@ -23,6 +24,7 @@ router.get("/", getUserContext);
 router.post("/goal/add", addGoal); // add single goal
 router.post("/goals/add", addGoals); // add multiple goals as array
 router.get("/goals", getGoals); // fetch all goals
+router.delete("/goals", deleteAllGoals); // delete all goals
 router.get("/goal/:goalId", getSingleGoal); // fetch single goal
 
 // Create journal and mood themes (for AI)

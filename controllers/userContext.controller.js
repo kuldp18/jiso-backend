@@ -251,6 +251,41 @@ export const getSingleGoal = async (req, res) => {
 
 // delete all goals
 
+export const deleteAllGoals = async (req, res) => {
+  try {
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    if (userContext.goals.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Goals are already empty",
+      });
+    }
+
+    userContext.goals = [];
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "All goals have been deleted successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while deleting all the goals",
+    });
+  }
+};
+
 // delete single goal
 
 // toggle goal completion
