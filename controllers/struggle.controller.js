@@ -282,7 +282,54 @@ export const updateStruggle = async (req, res) => {
   }
 };
 // delete struggle
-export const deleteStruggle = async (req, res) => {};
+export const deleteSingleStruggle = async (req, res) => {
+  const { struggleId } = req.params;
+  try {
+    if (!struggleId) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide a struggleId to delete a struggle",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    const struggleIndex = userContext.struggles.findIndex(
+      (struggle) => struggle._id.toString() === struggleId
+    );
+
+    if (struggleIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid struggleId or struggle not found",
+      });
+    }
+
+    // Remove the struggle using splice
+    userContext.struggles.splice(struggleIndex, 1);
+
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Struggle deleted successfully",
+      context: updatedContext.struggles,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while deleting the struggle",
+    });
+  }
+};
 // delete all struggles
 export const deleteAllStruggles = async (req, res) => {
   try {

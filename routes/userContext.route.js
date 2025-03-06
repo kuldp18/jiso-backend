@@ -23,6 +23,7 @@ import {
   addStruggles,
   changeSeverity,
   deleteAllStruggles,
+  deleteSingleStruggle,
   fetchAllStruggles,
   fetchSingleStruggle,
   updateStruggle,
@@ -50,8 +51,9 @@ router.patch("/goal/edit/:goalId", editGoal); // edit goal
 router.post("/struggle/add", addStruggle); //add single struggle
 router.post("/struggles/add", addStruggles); //add multiple struggles
 router.get("/struggles", fetchAllStruggles); //fetch all struggles
-router.delete("/struggles", deleteAllStruggles); //delete all struggles
 router.get("/struggle/:struggleId", fetchSingleStruggle); //fetch single struggle
+router.delete("/struggles", deleteAllStruggles); //delete all struggles
+router.delete("/struggle/:struggleId", deleteSingleStruggle); //delete single struggle
 router.patch("/struggle/severity/:struggleId", changeSeverity); //update struggle severity
 router.patch("/struggle/:struggleId", updateStruggle); //update struggle
 
