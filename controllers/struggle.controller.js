@@ -88,7 +88,36 @@ export const addStruggles = async (req, res) => {
   }
 };
 // fetch all struggles
-export const fetchAllStruggles = async (req, res) => {};
+export const fetchAllStruggles = async (req, res) => {
+  try {
+    const userContext = await UserContext.findOne({ userId: req.userId });
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    if (userContext.struggles.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No user struggles found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User struggles found successfully",
+      struggles: userContext.struggles,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while fetching user struggles",
+    });
+  }
+};
 // fetch single struggle
 export const fetchSingleStruggle = async (req, res) => {};
 // change severity
