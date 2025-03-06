@@ -224,7 +224,63 @@ export const changeSeverity = async (req, res) => {
   }
 };
 // update struggle
-export const updateStruggle = async (req, res) => {};
+export const updateStruggle = async (req, res) => {
+  const { struggleId } = req.params;
+  const { struggle, severity, description } = req.body;
+
+  try {
+    if (!struggleId || !struggle) {
+      return res.status(400).json({
+        success: false,
+        message: "A struggleId and struggle are required to update",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    const struggleIndex = userContext.struggles.findIndex(
+      (struggle) => struggle._id.toString() === struggleId
+    );
+
+    if (struggleIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid struggleId or struggle not found",
+      });
+    }
+
+    const existingStruggle = userContext.struggles[struggleIndex];
+
+    userContext.struggles[struggleIndex] = {
+      _id: existingStruggle._id, // Preserve the original ID
+      struggle: struggle || existingStruggle.struggle,
+      severity: severity !== undefined ? severity : existingStruggle.severity,
+      description:
+        description !== undefined ? description : existingStruggle.description,
+    };
+
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Struggle updated successfully",
+      context: updatedContext.struggles,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while updating the struggle",
+    });
+  }
+};
 // delete struggle
 export const deleteStruggle = async (req, res) => {};
 // delete all struggles

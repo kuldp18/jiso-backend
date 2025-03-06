@@ -25,6 +25,7 @@ import {
   deleteAllStruggles,
   fetchAllStruggles,
   fetchSingleStruggle,
+  updateStruggle,
 } from "../controllers/struggle.controller.js";
 
 const router = Router();
@@ -52,6 +53,7 @@ router.get("/struggles", fetchAllStruggles); //fetch all struggles
 router.delete("/struggles", deleteAllStruggles); //delete all struggles
 router.get("/struggle/:struggleId", fetchSingleStruggle); //fetch single struggle
 router.patch("/struggle/severity/:struggleId", changeSeverity); //update struggle severity
+router.patch("/struggle/:struggleId", updateStruggle); //update struggle
 
 // Create journal and mood themes (for AI)
 router.post("/ai/theme/journal", createJournalTheme);
