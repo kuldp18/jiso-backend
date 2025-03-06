@@ -197,3 +197,54 @@ export const updateJournalEntry = async (req, res) => {
     });
   }
 };
+
+// delete journal entry
+export const deleteJournalEntry = async (req, res) => {
+  const { journalId } = req.params;
+
+  try {
+    if (!journalId) {
+      return res.status(400).json({
+        success: false,
+        message: "journalId is required to delete a journal entry",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(journalId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid journalId provided",
+      });
+    }
+
+    const journalEntry = await Journal.findOne({
+      userId: req.userId,
+      _id: journalId,
+    });
+
+    if (!journalEntry) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid journalId or journal entry not found",
+      });
+    }
+
+    const deletedEntry = await Journal.deleteOne({
+      userId: req.userId,
+      _id: journalId,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Journal entry deleted successfully",
+      deletedEntry: journalEntry,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while deleting the journal entry",
+    });
+  }
+};
