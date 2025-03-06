@@ -19,7 +19,7 @@ app.use(cookieParser());
 // routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/context", userContextRoutes);
-app.use("/api/v1/journal", journalRoutes);
+app.use("/api/v1/journals", journalRoutes);
 
 const PORT = process.env.PORT || 8888;
 

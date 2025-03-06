@@ -1,4 +1,5 @@
 import { Journal } from "../models/journal.model.js";
+import mongoose from "mongoose";
 
 // create new journal entry
 export const createJournalEntry = async (req, res) => {
@@ -85,6 +86,37 @@ export const fetchJournalEntry = async (req, res) => {
       success: false,
       message:
         error.message || "Something went wrong while fetching journal entry",
+    });
+  }
+};
+
+// fetch all journal entries for user
+
+export const fetchJournalEntries = async (req, res) => {
+  const entries = await Journal.find({
+    userId: req.userId,
+  });
+
+  try {
+    if (entries.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No journal entries found for this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Entries found successfully",
+      total: entries.length,
+      entries,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while fetching the user journal entries",
     });
   }
 };
