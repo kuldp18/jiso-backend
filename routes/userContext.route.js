@@ -31,33 +31,46 @@ import {
 
 const router = Router();
 
+// Apply authentication middleware to all routes
 router.use(verifyToken);
 
-// User context
+/**
+ * User Context Routes
+ * Handles basic user context operations
+ */
 router.post("/create", createUserContext);
 router.get("/", getUserContext);
 
-// Goals
-router.post("/goal/add", addGoal); // add single goal
-router.post("/goals/add", addGoals); // add multiple goals as array
-router.get("/goals", getGoals); // fetch all goals
-router.delete("/goals", deleteAllGoals); // delete all goals
-router.get("/goal/:goalId", getSingleGoal); // fetch single goal
-router.delete("/goal/:goalId", deleteSingleGoal); // delete single goal
-router.patch("/goal/toggle/:goalId", toggleGoalCompletion); // toggle completed property
-router.patch("/goal/edit/:goalId", editGoal); // edit goal
+/**
+ * Goal Routes
+ * Handles CRUD operations for user goals
+ */
+router.post("/goal/add", addGoal); // Add a single goal
+router.post("/goals/add", addGoals); // Add multiple goals
+router.get("/goals", getGoals); // Get all goals
+router.get("/goal/:goalId", getSingleGoal); // Get a specific goal
+router.patch("/goal/edit/:goalId", editGoal); // Update a goal
+router.patch("/goal/toggle/:goalId", toggleGoalCompletion); // Toggle goal completion
+router.delete("/goal/:goalId", deleteSingleGoal); // Delete a specific goal
+router.delete("/goals", deleteAllGoals); // Delete all goals
 
-// Struggles
-router.post("/struggle/add", addStruggle); //add single struggle
-router.post("/struggles/add", addStruggles); //add multiple struggles
-router.get("/struggles", fetchAllStruggles); //fetch all struggles
-router.get("/struggle/:struggleId", fetchSingleStruggle); //fetch single struggle
-router.delete("/struggles", deleteAllStruggles); //delete all struggles
-router.delete("/struggle/:struggleId", deleteSingleStruggle); //delete single struggle
-router.patch("/struggle/severity/:struggleId", changeSeverity); //update struggle severity
-router.patch("/struggle/:struggleId", updateStruggle); //update struggle
+/**
+ * Struggle Routes
+ * Handles CRUD operations for user struggles
+ */
+router.post("/struggle/add", addStruggle); // Add a single struggle
+router.post("/struggles/add", addStruggles); // Add multiple struggles
+router.get("/struggles", fetchAllStruggles); // Get all struggles
+router.get("/struggle/:struggleId", fetchSingleStruggle); // Get a specific struggle
+router.patch("/struggle/:struggleId", updateStruggle); // Update a struggle
+router.patch("/struggle/severity/:struggleId", changeSeverity); // Update struggle severity
+router.delete("/struggle/:struggleId", deleteSingleStruggle); // Delete a specific struggle
+router.delete("/struggles", deleteAllStruggles); // Delete all struggles
 
-// Create journal and mood themes (for AI)
+/**
+ * AI Theme Routes
+ * Handles theme generation for AI features
+ */
 router.post("/ai/theme/journal", createJournalTheme);
 router.post("/ai/theme/mood", createMoodTheme);
 
