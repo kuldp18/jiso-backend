@@ -21,6 +21,7 @@ import {
 import {
   addStruggle,
   addStruggles,
+  deleteAllStruggles,
   fetchAllStruggles,
 } from "../controllers/struggle.controller.js";
 
@@ -46,6 +47,7 @@ router.patch("/goal/edit/:goalId", editGoal); // edit goal
 router.post("/struggle/add", addStruggle); //add single struggle
 router.post("/struggles/add", addStruggles); //add multiple struggles
 router.get("/struggles", fetchAllStruggles); //fetch all struggles
+router.delete("/struggles", deleteAllStruggles); //fetch all struggles
 
 // Create journal and mood themes (for AI)
 router.post("/ai/theme/journal", createJournalTheme);

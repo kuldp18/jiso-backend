@@ -127,4 +127,30 @@ export const updateStruggle = async (req, res) => {};
 // delete struggle
 export const deleteStruggle = async (req, res) => {};
 // delete all struggles
-export const deleteAllStruggles = async (req, res) => {};
+export const deleteAllStruggles = async (req, res) => {
+  try {
+    const userContext = await UserContext.findOne({ userId: req.userId });
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    // remove all struggles
+    userContext.struggles = [];
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "All struggles deleted successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while deleting the struggles",
+    });
+  }
+};
