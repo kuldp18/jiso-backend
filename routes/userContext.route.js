@@ -21,6 +21,7 @@ import {
 import {
   addStruggle,
   addStruggles,
+  changeSeverity,
   deleteAllStruggles,
   fetchAllStruggles,
   fetchSingleStruggle,
@@ -48,8 +49,9 @@ router.patch("/goal/edit/:goalId", editGoal); // edit goal
 router.post("/struggle/add", addStruggle); //add single struggle
 router.post("/struggles/add", addStruggles); //add multiple struggles
 router.get("/struggles", fetchAllStruggles); //fetch all struggles
-router.delete("/struggles", deleteAllStruggles); //fetch all struggles
+router.delete("/struggles", deleteAllStruggles); //delete all struggles
 router.get("/struggle/:struggleId", fetchSingleStruggle); //fetch single struggle
+router.patch("/struggle/severity/:struggleId", changeSeverity); //update struggle severity
 
 // Create journal and mood themes (for AI)
 router.post("/ai/theme/journal", createJournalTheme);

@@ -27,7 +27,7 @@ export const addStruggle = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "New struggle added in the user context",
-      context: updatedContext,
+      context: updatedContext.struggles,
     });
   } catch (error) {
     res.status(500).json({
@@ -76,7 +76,7 @@ export const addStruggles = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "New struggles successfully added in the context",
-      context: updatedContext,
+      context: updatedContext.struggles,
     });
   } catch (error) {
     res.status(500).json({
@@ -166,7 +166,63 @@ export const fetchSingleStruggle = async (req, res) => {
   }
 };
 // change severity
-export const changeSeverity = async (req, res) => {};
+export const changeSeverity = async (req, res) => {
+  const { severity } = req.body;
+  const { struggleId } = req.params;
+
+  try {
+    if (!severity || !struggleId) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide struggleId and it's severity to update struggle",
+      });
+    }
+
+    if (isNaN(severity) && isNaN(parseFloat(severity))) {
+      return res.status(400).json({
+        success: false,
+        message: "Severity should be a number from 0-10",
+      });
+    }
+
+    const userContext = await UserContext.findOne({ userId: req.userId });
+
+    if (!userContext) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't find a context for this user",
+      });
+    }
+
+    const struggleIndex = userContext.struggles.findIndex(
+      (struggle) => struggle._id.toString() === struggleId
+    );
+
+    if (struggleIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid struggleId or struggle not found",
+      });
+    }
+
+    // update severity
+    userContext.struggles[struggleIndex].severity = severity;
+    const updatedContext = await userContext.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Struggle severity updated successfully",
+      context: updatedContext.struggles,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while updating the severity in the context",
+    });
+  }
+};
 // update struggle
 export const updateStruggle = async (req, res) => {};
 // delete struggle
