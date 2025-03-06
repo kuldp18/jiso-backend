@@ -82,7 +82,7 @@ export const getUserContext = async (req, res) => {
   }
 };
 
-// For AI
+// TODO :  WILL NOT WORK WITH CRON JOBS!
 // create journal theme (weekly or monthly)
 export const createJournalTheme = async (req, res) => {
   let { type, theme, description } = req.body;
