@@ -1,4 +1,4 @@
-import { UserContext } from "../models/userContext.model.js";
+import { UserContext } from "../models/usercontext.model.js";
 
 // add a new goal
 export const addGoal = async (req, res) => {

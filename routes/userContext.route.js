@@ -18,6 +18,8 @@ import {
   editGoal,
 } from "../controllers/goal.controller.js";
 
+import { addStruggle } from "../controllers/struggle.controller.js";
+
 const router = Router();
 
 router.use(verifyToken);
@@ -35,6 +37,9 @@ router.get("/goal/:goalId", getSingleGoal); // fetch single goal
 router.delete("/goal/:goalId", deleteSingleGoal); // delete single goal
 router.patch("/goal/toggle/:goalId", toggleGoalCompletion); // toggle completed property
 router.patch("/goal/edit/:goalId", editGoal); // edit goal
+
+// Struggles
+router.post("/struggle/add", addStruggle); //add single struggle
 
 // Create journal and mood themes (for AI)
 router.post("/ai/theme/journal", createJournalTheme);
