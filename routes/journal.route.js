@@ -11,13 +11,15 @@ import {
 
 const router = Router();
 
+// Apply authentication middleware to all routes
 router.use(verifyToken);
 
-router.post("/create", createJournalEntry); // create new entry
-router.get("/:journalId", fetchJournalEntry); // fetch specific entry
-router.get("/", fetchJournalEntries); // fetch all entries
-router.delete("/", deleteJournalEntries); // delete all entries
-router.patch("/:journalId", updateJournalEntry); // update specific entry
-router.delete("/:journalId", deleteJournalEntry); // delete specific entry
+// Journal entry routes
+router.post("/create", createJournalEntry); // Create a new journal entry
+router.get("/:journalId", fetchJournalEntry); // Fetch a specific journal entry by ID
+router.get("/", fetchJournalEntries); // Fetch all journal entries
+router.delete("/", deleteJournalEntries); // Delete all journal entries
+router.patch("/:journalId", updateJournalEntry); // Update a specific journal entry
+router.delete("/:journalId", deleteJournalEntry); // Delete a specific journal entry
 
 export default router;
