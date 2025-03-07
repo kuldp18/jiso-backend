@@ -229,7 +229,7 @@ export const deleteJournalEntry = async (req, res) => {
       });
     }
 
-    const deletedEntry = await Journal.deleteOne({
+    await Journal.deleteOne({
       userId: req.userId,
       _id: journalId,
     });
@@ -245,6 +245,26 @@ export const deleteJournalEntry = async (req, res) => {
       message:
         error.message ||
         "Something went wrong while deleting the journal entry",
+    });
+  }
+};
+
+// delete all journal entries
+export const deleteJournalEntries = async (req, res) => {
+  try {
+    const result = await Journal.deleteMany({ userId: req.userId });
+
+    res.status(200).json({
+      success: true,
+      message: "All user journal entries deleted successfully",
+      result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while deleting the user journal entries",
     });
   }
 };
