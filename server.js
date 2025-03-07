@@ -6,6 +6,7 @@ import {
   authRoutes,
   userContextRoutes,
   journalRoutes,
+  moodRoutes,
 } from "./routes/index.js";
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/context", userContextRoutes);
 app.use("/api/v1/journals", journalRoutes);
+app.use("/api/v1/moods", moodRoutes);
 
 const PORT = process.env.PORT || 8888;
 
