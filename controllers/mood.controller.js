@@ -195,3 +195,23 @@ export const deleteMoodEntry = async (req, res) => {
     });
   }
 };
+
+// delete all mood entries
+export const deleteMoodEntries = async (req, res) => {
+  try {
+    const result = await Mood.deleteMany({ userId: req.userId });
+
+    res.status(200).json({
+      success: true,
+      message: "All mood entries deleted successfully",
+      result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while deleting user mood entries",
+    });
+  }
+};
