@@ -12,3 +12,29 @@ export const createDefaultInsight = async (userId) => {
     );
   }
 };
+
+// get user insight
+export const getUserInsight = async (req, res) => {
+  try {
+    const userInsight = await Insight.findOne({ userId: req.userId });
+
+    if (!userInsight) {
+      return res.status(404).json({
+        success: false,
+        message: "Insight not found or does not exist",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User insight retrieved successfully",
+      insight: userInsight,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while fetching user insight",
+    });
+  }
+};
