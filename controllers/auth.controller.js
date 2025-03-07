@@ -13,6 +13,7 @@ import {
   sendEmailVerificationEmail,
   sendPasswordResetEmail,
 } from "../mailersend/mails.js";
+import { createDefaultInsight } from "./insight.controller.js";
 
 export const signup = async (req, res) => {
   const { name, email, password, gender, age } = req.body;
@@ -65,6 +66,9 @@ export const signup = async (req, res) => {
 
     // send verification email
     await sendEmailVerificationEmail(user);
+
+    // create default insight document
+    await createDefaultInsight(user._id);
 
     return res.status(201).json({
       success: true,
