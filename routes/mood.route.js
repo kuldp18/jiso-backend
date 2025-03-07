@@ -4,6 +4,7 @@ import {
   createMoodEntry,
   fetchMoodEntries,
   fetchMoodEntry,
+  updateMoodEntry,
 } from "../controllers/mood.controller.js";
 
 const router = Router();
@@ -14,5 +15,6 @@ router.use(verifyToken);
 router.post("/create", createMoodEntry); // create new mood entry
 router.get("/", fetchMoodEntries); // get all mood entries
 router.get("/:moodId", fetchMoodEntry); // get a single mood entry
+router.patch("/:moodId", updateMoodEntry); // update a mood entry
 
 export default router;

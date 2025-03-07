@@ -110,3 +110,51 @@ export const fetchMoodEntry = async (req, res) => {
     });
   }
 };
+
+// update mood entry
+export const updateMoodEntry = async (req, res) => {
+  const { moodId } = req.params;
+  const { emotions, description } = req.body;
+  try {
+    if (!moodId) {
+      return res.status(400).json({
+        success: false,
+        message: "moodId is required to update a mood entry",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(moodId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid moodId provided",
+      });
+    }
+
+    const moodEntry = await Mood.findOne({ _id: moodId, userId: req.userId });
+
+    if (!moodEntry) {
+      return res.status(404).json({
+        success: false,
+        message: "Mood entry not found for this user",
+      });
+    }
+
+    // update only the provided fields
+    if (emotions) moodEntry.emotions = emotions;
+    if (description) moodEntry.description = description;
+
+    const updatedMoodEntry = await moodEntry.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Mood entry updated successfully",
+      entry: updatedMoodEntry,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while updating mood entry",
+    });
+  }
+};
