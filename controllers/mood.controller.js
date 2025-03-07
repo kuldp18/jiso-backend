@@ -68,3 +68,45 @@ export const fetchMoodEntries = async (req, res) => {
     });
   }
 };
+
+// get specific mood entry
+export const fetchMoodEntry = async (req, res) => {
+  const { moodId } = req.params;
+
+  try {
+    if (!moodId) {
+      return res.status(400).json({
+        success: false,
+        message: "moodId is required to fetch a mood entry",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(moodId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid moodId provided",
+      });
+    }
+
+    const moodEntry = await Mood.findOne({ _id: moodId, userId: req.userId });
+
+    if (!moodEntry) {
+      return res.status(404).json({
+        success: false,
+        message: "Mood entry not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Mood entry fetched successfully",
+      entry: moodEntry,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while fetching mood entry",
+    });
+  }
+};
