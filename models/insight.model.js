@@ -13,46 +13,55 @@ const insightSchema = new mongoose.Schema(
       ref: "UserContext",
     },
 
-    weekly: [
-      {
-        date: {
-          type: Date,
-          default: Date.now,
+    weekly: {
+      type: [
+        {
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          insight: {
+            type: String,
+            required: true,
+          },
+          description: String,
         },
-        insight: {
-          type: String,
-          required: true,
+      ],
+      default: [],
+    },
+    monthly: {
+      type: [
+        {
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          insight: {
+            type: String,
+            required: true,
+          },
+          description: String,
         },
-        description: String,
-      },
-    ],
-    monthly: [
-      {
-        date: {
-          type: Date,
-          default: Date.now,
-        },
-        insight: {
-          type: String,
-          required: true,
-        },
-        description: String,
-      },
-    ],
+      ],
+      default: [],
+    },
 
-    suggestions: [
-      {
-        date: {
-          type: Date,
-          default: Date.now,
+    suggestions: {
+      type: [
+        {
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          suggestion: {
+            type: String,
+            required: true,
+          },
+          description: String,
         },
-        suggestion: {
-          type: String,
-          required: true,
-        },
-        description: String,
-      },
-    ],
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );
