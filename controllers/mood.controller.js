@@ -158,3 +158,40 @@ export const updateMoodEntry = async (req, res) => {
     });
   }
 };
+
+// delete mood entry
+export const deleteMoodEntry = async (req, res) => {
+  const { moodId } = req.params;
+  try {
+    if (!moodId || !mongoose.Types.ObjectId.isValid(moodId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid moodId provided",
+      });
+    }
+
+    const moodEntry = await Mood.findOneAndDelete({
+      _id: moodId,
+      userId: req.userId,
+    });
+
+    if (!moodEntry) {
+      return res.status(404).json({
+        success: false,
+        message: "Mood entry not found or already deleted",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Mood entry deleted successfully",
+      entry: moodEntry,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while deleting mood entry",
+    });
+  }
+};

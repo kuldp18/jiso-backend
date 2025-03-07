@@ -2,6 +2,7 @@ import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import {
   createMoodEntry,
+  deleteMoodEntry,
   fetchMoodEntries,
   fetchMoodEntry,
   updateMoodEntry,
@@ -16,5 +17,6 @@ router.post("/create", createMoodEntry); // create new mood entry
 router.get("/", fetchMoodEntries); // get all mood entries
 router.get("/:moodId", fetchMoodEntry); // get a single mood entry
 router.patch("/:moodId", updateMoodEntry); // update a mood entry
+router.delete("/:moodId", deleteMoodEntry); // delete a mood entry
 
 export default router;
