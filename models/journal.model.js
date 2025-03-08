@@ -22,6 +22,21 @@ const journalSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+
+    summaries: {
+      small: {
+        type: String,
+        default: "",
+      },
+      medium: {
+        type: String,
+        default: "",
+      },
+      large: {
+        type: String,
+        default: "",
+      },
+    },
   },
   { timestamps: true }
 );
