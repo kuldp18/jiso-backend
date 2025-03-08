@@ -1,4 +1,5 @@
-import { User } from "../models/user.model.js";
+import { summarizeJournal } from "../ai/journal.ai.js";
+import { Journal } from "../models/journal.model.js";
 
 // User Contexts
 
@@ -50,3 +51,42 @@ export const updateUserInsightsWeekly = async (req, res) => {
 };
 
 export const updateUserInsightsMonthly = async (req, res) => {};
+
+//Journals
+
+export const summarizePendingJournals = async (req, res) => {
+  const apiKey = req.headers["x-api-key"];
+
+  try {
+    if (!apiKey || apiKey !== process.env.CRON_API_KEY) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Valid API key is required.",
+      });
+    }
+
+    const pendingJournals = await Journal.find({ summaryStatus: "pending" });
+
+    if (pendingJournals.length === 0) {
+      return;
+    }
+
+    // loop through pending journals and summarize them
+    for (let journal of pendingJournals) {
+      //summarize journal
+      await summarizeJournal(journal);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Summarized all pending journals.",
+      count: pendingJournals.length,
+      entries: pendingJournals,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "An error occurred while summarizing journals.",
+    });
+  }
+};
