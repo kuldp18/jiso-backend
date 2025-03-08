@@ -3,7 +3,6 @@ import { verifyToken } from "../middlewares/auth.middleware.js";
 import {
   createJournalTheme,
   createMoodTheme,
-  createUserContext,
   getUserContext,
 } from "../controllers/userContext.controller.js";
 
@@ -38,7 +37,6 @@ router.use(verifyToken);
  * User Context Routes
  * Handles basic user context operations
  */
-router.post("/create", createUserContext);
 router.get("/", getUserContext);
 
 /**

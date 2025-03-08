@@ -14,6 +14,7 @@ import {
   sendPasswordResetEmail,
 } from "../mailersend/mails.js";
 import { createDefaultInsight } from "./insight.controller.js";
+import { createDefaultUserContext } from "./userContext.controller.js";
 
 export const signup = async (req, res) => {
   const { name, email, password, gender, age } = req.body;
@@ -69,6 +70,8 @@ export const signup = async (req, res) => {
 
     // create default insight document
     await createDefaultInsight(user._id);
+    // create default user context
+    await createDefaultUserContext(user._id);
 
     return res.status(201).json({
       success: true,

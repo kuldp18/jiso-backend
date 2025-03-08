@@ -111,6 +111,23 @@ const userContextSchema = new mongoose.Schema(
       },
       default: { weekly: [], monthly: [] }, // Initialize as empty object with arrays
     },
+
+    chatThemes: {
+      type: [
+        {
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          theme: {
+            type: String,
+            required: true,
+          },
+          description: String,
+        },
+      ],
+      default: [], // Initialize as empty array
+    },
   },
   { timestamps: true }
 );

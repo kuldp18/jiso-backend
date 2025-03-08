@@ -2,58 +2,16 @@ import { UserContext } from "../models/usercontext.model.js";
 
 // USER CONTEXT
 
-// create new user context
-export const createUserContext = async (req, res) => {
-  const { goals, struggles } = req.body;
-
+// create default user context
+export const createDefaultUserContext = async (userId) => {
   try {
-    if (!goals || goals.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Please fill in at least one of your goals",
-      });
-    }
-
-    if (!struggles || struggles.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Please fill in at least one of your struggles",
-      });
-    }
-
-    // check if context already exists
-
-    const existingContext = await UserContext.findOne({
-      userId: req.userId,
-    });
-
-    if (existingContext) {
-      return res.status(400).json({
-        success: false,
-        message: "A context already exists for this user",
-        contextId: existingContext._id,
-      });
-    }
-
-    const newUserContext = new UserContext({
-      userId: req.userId,
-      goals,
-      struggles,
-    });
-
-    const savedContext = await newUserContext.save();
-
-    res.status(201).json({
-      success: true,
-      message: "New user context created successfully",
-      context: savedContext,
-    });
+    const newUserContext = new UserContext({ userId });
+    await newUserContext.save();
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message:
-        error.message || "Something went wrong while creating user context",
-    });
+    console.error(
+      error.message ||
+        "Something went wrong while creating default user context"
+    );
   }
 };
 
