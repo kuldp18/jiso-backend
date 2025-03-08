@@ -8,6 +8,7 @@ import {
   journalRoutes,
   moodRoutes,
   insightRoutes,
+  cronRoutes,
 } from "./routes/index.js";
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use("/api/v1/context", userContextRoutes);
 app.use("/api/v1/journals", journalRoutes);
 app.use("/api/v1/moods", moodRoutes);
 app.use("/api/v1/insights", insightRoutes);
+app.use("/api/v1/cron", cronRoutes);
 
 const PORT = process.env.PORT || 8888;
 
