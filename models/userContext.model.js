@@ -113,20 +113,41 @@ const userContextSchema = new mongoose.Schema(
     },
 
     chatThemes: {
-      type: [
-        {
-          date: {
-            type: Date,
-            default: Date.now,
-          },
-          theme: {
-            type: String,
-            required: true,
-          },
-          description: String,
+      type: {
+        weekly: {
+          type: [
+            {
+              date: {
+                type: Date,
+                default: Date.now,
+              },
+              theme: {
+                type: String,
+                required: true,
+              },
+              description: String,
+            },
+          ],
+          default: [],
         },
-      ],
-      default: [], // Initialize as empty array
+        monthly: {
+          type: [
+            {
+              date: {
+                type: Date,
+                default: Date.now,
+              },
+              theme: {
+                type: String,
+                required: true,
+              },
+              description: String,
+            },
+          ],
+          default: [],
+        },
+      },
+      default: { weekly: [], monthly: [] }, // Initialize as empty object with arrays
     },
   },
   { timestamps: true }
