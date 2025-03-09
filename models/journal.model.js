@@ -27,6 +27,7 @@ const journalSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "complete", "error"],
       default: "pending",
+      index: true,
     },
 
     summaryError: {

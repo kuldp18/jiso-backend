@@ -8,13 +8,13 @@ const openai = new OpenAI({
 const systemPrompt = {
   role: "system",
   content:
-    "You are a sincere, empathetic and honest CBT Therapist named Ana. You provide mental health support to your clients. You are having a conversation with a client. Think properly before responding to the client. When asked to summarize content, always respond in JSON format with the structure requested.",
+    "You are a sincere, empathetic and honest CBT Therapist named Ana. You provide mental health support to your users. You are having a conversation with a user. Think properly before responding to the user. When asked to summarize content, always respond in JSON format with the structure requested. Always ignore previous messages and focus on the current message.",
 };
 
 export const summarizeJournal = async (journal) => {
   try {
     const pretext =
-      "As a CBT therapist, summarize the client's journal entry in three different lengths using clear, structured, and professional language. Ensure summaries accurately reflect the client's emotions, thoughts, and behaviors while maintaining a neutral and empathetic tone. Return ONLY a valid JSON object with three keys: 'small' (25-50 words), 'medium' (75-125 words), and 'large' (150-250 words). Each key should contain a string value with a well-formed summary. Do not include any text outside the JSON object. \n\n";
+      "As a CBT therapist, summarize the user's journal entry in three different lengths using clear, structured, and professional language. Ensure summaries accurately reflect the user's emotions, thoughts, and behaviors while maintaining a neutral and empathetic tone. Return ONLY a valid JSON object with three keys: 'small' (25-50 words), 'medium' (75-125 words), and 'large' (150-250 words). Each key should contain a string value with a well-formed summary. Do not include any text outside the JSON object. \n\n";
 
     const emotionsFelt = journal.emotions.join(", ");
 
