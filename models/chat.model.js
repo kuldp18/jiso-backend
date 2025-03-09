@@ -1,5 +1,23 @@
 import mongoose from "mongoose";
 
+// Schema for individual messages
+const messageSchema = new mongoose.Schema({
+  sender: {
+    type: String,
+    enum: ["user", "ai"],
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+// Schema for chat sessions
 const chatSchema = new mongoose.Schema(
   {
     userId: {
@@ -10,15 +28,15 @@ const chatSchema = new mongoose.Schema(
     userContext: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "UserContext",
-    },
-    sender: {
-      type: String,
-      enum: ["user", "ai"],
       required: true,
     },
-    message: {
+    title: {
       type: String,
-      required: true,
+      default: "New Chat",
+    },
+    messages: {
+      type: [messageSchema],
+      default: [],
     },
   },
   { timestamps: true }
