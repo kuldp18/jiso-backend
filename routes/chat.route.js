@@ -4,7 +4,7 @@ import {
   requireVerifiedEmail,
 } from "../middlewares/auth.middleware.js";
 
-import { createChat } from "../controllers/chat.controller.js";
+import { createChat, sendMessage } from "../controllers/chat.controller.js";
 
 const router = Router();
 
@@ -13,5 +13,6 @@ router.use(verifyToken, requireVerifiedEmail);
 
 //create new chat
 router.get("/new", createChat);
+router.post("/:chatId/send", sendMessage);
 
 export default router;
