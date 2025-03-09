@@ -65,7 +65,10 @@ export const summarizePendingJournals = async (req, res) => {
       });
     }
 
-    const pendingJournals = await Journal.find({ summaryStatus: "pending" });
+    // get journals with pending or error status
+    const pendingJournals = await Journal.find({
+      summaryStatus: { $in: ["pending", "error"] },
+    });
 
     if (pendingJournals.length === 0) {
       return;

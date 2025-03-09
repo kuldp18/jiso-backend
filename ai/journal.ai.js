@@ -37,17 +37,21 @@ export const summarizeJournal = async (journal) => {
       journal.summaries.large = summaries?.large;
 
       journal.summaryStatus = "complete";
+
+      if (journal.summaryError) {
+        journal.summaryError = null;
+      }
+
       await journal.save();
     } catch (error) {
-      console.error("Error parsing summary: ", error);
-      // Fallback in case the response isn't properly formatted
-      return {
-        small: "Error parsing summary",
-        medium: "Error parsing summary",
-        large: "Error parsing summary",
-      };
+      console.error(`Error parsing AI response: ${error.message}`);
+      journal.summaryStatus = "error";
+      journal.summaryError = error.message;
+      await journal.save();
     }
   } catch (error) {
-    console.error(`Error summarizing journal with id ${journal._id}: ${error}`);
+    console.error(
+      `Error summarizing journal with id ${journal._id}: ${error.message}`
+    );
   }
 };

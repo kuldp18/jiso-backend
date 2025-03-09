@@ -25,8 +25,13 @@ const journalSchema = new mongoose.Schema(
 
     summaryStatus: {
       type: String,
-      enum: ["pending", "complete"],
+      enum: ["pending", "complete", "error"],
       default: "pending",
+    },
+
+    summaryError: {
+      type: String,
+      default: null,
     },
 
     summaries: {
