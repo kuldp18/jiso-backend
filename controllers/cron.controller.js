@@ -67,18 +67,28 @@ export const summarizePendingJournals = async (req, res) => {
       });
     }
 
-    // TODO : ONLY GET JOURNALS OF USERS THAT HAVE VERIFIED EMAIL
-    // get journals with pending or error status
+    // get journals with pending or error status with verified users
     const pendingJournals = await Journal.find({
       summaryStatus: { $in: ["pending", "error"] },
+    }).populate({
+      path: "userId",
+      select: "isEmailVerified",
+      match: { isEmailVerified: true },
     });
 
-    if (pendingJournals.length === 0) {
-      return;
+    const verifiedJournals = pendingJournals.filter(
+      (journal) => journal.userId // filter out journals with unverified users
+    );
+
+    if (verifiedJournals.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No pending journals found to summarize.",
+      });
     }
 
-    // loop through pending journals and summarize them
-    for (let journal of pendingJournals) {
+    // loop through verified journals and summarize them
+    for (let journal of verifiedJournals) {
       //summarize journal
       await summarizeJournal(journal);
     }
@@ -86,8 +96,8 @@ export const summarizePendingJournals = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Summarized all pending journals.",
-      count: pendingJournals.length,
-      entries: pendingJournals,
+      count: verifiedJournals.length,
+      entries: verifiedJournals,
     });
   } catch (error) {
     return res.status(500).json({
