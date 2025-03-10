@@ -49,6 +49,11 @@ const chatSchema = new mongoose.Schema(
       enum: ["pending", "complete", "error"],
       default: "pending",
     },
+
+    summaryError: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

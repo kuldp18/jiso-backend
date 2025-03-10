@@ -80,17 +80,20 @@ Keep it concise, warm, and emotionally aware. Write the summary like Ana reflect
 
     if (!result) {
       chat.summaryStatus = "error";
+      chat.summaryError = "Error or empty response from AI model";
       await chat.save();
     }
 
     chat.summary = result;
     chat.summaryStatus = "complete";
+    chat.summaryError = null;
     await chat.save();
   } catch (error) {
     console.error(
       `Error getting chat summary for chat ${chat._id}: ${error.message}`
     );
     chat.summaryStatus = "error";
+    chat.summaryError = error.message;
     await chat.save();
   }
 };
