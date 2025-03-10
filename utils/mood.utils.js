@@ -10,7 +10,7 @@ export const fetchLastWeekMoods = async (userId) => {
       },
     });
 
-    if (!lastWeekMoods) {
+    if (!lastWeekMoods || lastWeekMoods.length === 0) {
       return [];
     }
 

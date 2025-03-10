@@ -12,7 +12,7 @@ export const fetchLastWeekJournalSummaries = async (userId) => {
       },
     });
 
-    if (!journals) {
+    if (!journals || journals.length === 0) {
       return [];
     }
 
