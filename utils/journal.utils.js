@@ -20,6 +20,7 @@ export const fetchLastWeekJournalSummaries = async (userId) => {
       return {
         summaries: journal.summaries,
         emotions: journal.emotions?.join(", ") || "none",
+        date: journal.createdAt.toDateString(),
       };
     });
 
