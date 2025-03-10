@@ -1,4 +1,4 @@
-import { Journal } from "../models/journal.model";
+import { Journal } from "../models/journal.model.js";
 
 // fetch last week journal summaries
 
