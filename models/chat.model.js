@@ -38,6 +38,17 @@ const chatSchema = new mongoose.Schema(
       type: [messageSchema],
       default: [],
     },
+
+    summary: {
+      type: String,
+      default: "",
+    },
+
+    summaryStatus: {
+      type: String,
+      enum: ["pending", "completed", "error"],
+      default: "pending",
+    },
   },
   { timestamps: true }
 );
