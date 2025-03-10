@@ -6,14 +6,14 @@ dotenv.config();
 
 export const sendEmailVerificationEmail = async (user) => {
   try {
-    const recipients = [new Recipient(user.email, user.name)];
+    const recipients = [new Recipient(user.email, user.fullName)];
 
     const personalization = [
       {
         email: user.email,
         data: {
           code: user.emailVerificationToken,
-          name: user.name,
+          name: user.firstName,
           account: {
             name: "Jiso",
           },
@@ -39,14 +39,14 @@ export const sendPasswordResetEmail = async (user, token) => {
   const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
 
   try {
-    const recipients = [new Recipient(user.email, user.name)];
+    const recipients = [new Recipient(user.email, user.fullName)];
 
     const personalization = [
       {
         email: user.email,
         data: {
           link: resetLink,
-          name: user.name,
+          name: user.firstName,
           account: {
             name: "Jiso",
           },

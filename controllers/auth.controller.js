@@ -17,11 +17,11 @@ import { createDefaultInsight } from "./insight.controller.js";
 import { createDefaultUserContext } from "./userContext.controller.js";
 
 export const signup = async (req, res) => {
-  const { name, email, password, gender, age } = req.body;
+  const { firstName, lastName, email, password, gender, age } = req.body;
 
   try {
     // make sure all fields are there
-    if (!name || !email || !password || !gender || !age) {
+    if (!firstName || !lastName || !email || !password || !gender || !age) {
       throw new Error("All fields are required.");
     }
 
@@ -43,7 +43,8 @@ export const signup = async (req, res) => {
     const user = new User({
       email,
       password: hashedPassword,
-      name,
+      firstName,
+      lastName,
       gender: gender || null,
       age: age || null,
       emailVerificationToken,
@@ -78,7 +79,7 @@ export const signup = async (req, res) => {
       message: "User created successfully",
       user: {
         id: user._id,
-        name: user.name,
+        name: user.fullName,
         email: user.email,
         gender: user.gender,
         age: user.age,
@@ -160,7 +161,7 @@ export const login = async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
-        name: user.name,
+        name: user.fullName,
         gender: user.gender,
         age: user.age,
       },
@@ -255,7 +256,7 @@ export const verifyEmail = async (req, res) => {
       message: "Your email has been verified",
       user: {
         id: user._id,
-        name: user.name,
+        name: user.fullName,
         email: user.email,
         verified: user.isEmailVerified,
       },
@@ -445,7 +446,7 @@ export const checkAuth = async (req, res) => {
       message: "User is authenticated",
       user: {
         id: user.id,
-        name: user.name,
+        name: user.fullName,
         email: user.email,
       },
     });

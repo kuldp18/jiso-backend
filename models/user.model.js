@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
       type: String,
       required: true,
     },
@@ -47,5 +51,14 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// virtual for full name
+userSchema.virtual("fullName").get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+// Make sure virtual fields are included when converting to JSON
+userSchema.set("toJSON", { virtuals: true });
+userSchema.set("toObject", { virtuals: true });
 
 export const User = mongoose.model("User", userSchema);
