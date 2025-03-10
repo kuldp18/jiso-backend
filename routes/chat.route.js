@@ -4,15 +4,19 @@ import {
   requireVerifiedEmail,
 } from "../middlewares/auth.middleware.js";
 
-import { createChat, sendMessage } from "../controllers/chat.controller.js";
+import {
+  createChat,
+  getChat,
+  sendMessage,
+} from "../controllers/chat.controller.js";
 
 const router = Router();
 
 // Apply authentication middlewares to all routes
 router.use(verifyToken, requireVerifiedEmail);
 
-//create new chat
-router.get("/new", createChat);
-router.post("/:chatId/send", sendMessage);
+router.get("/new", createChat); // create new chat
+router.get("/:chatId", getChat); // get chat by id
+router.post("/:chatId/send", sendMessage); // send new message to AI
 
 export default router;

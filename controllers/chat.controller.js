@@ -114,3 +114,37 @@ export const sendMessage = async (req, res) => {
     });
   }
 };
+
+// get chat by id
+export const getChat = async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    if (!chatId || !mongoose.Types.ObjectId.isValid(chatId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or empty chatId. Please provide a valid chatId.",
+      });
+    }
+
+    const chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found or does not exist.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Chat found successfully.",
+      chat,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while getting chat.",
+    });
+  }
+};
