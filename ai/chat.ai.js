@@ -56,7 +56,7 @@ export const createChatSummary = async (chat) => {
 
 ${chatTranscript}
 
-Please summarize this chat session. Include:
+Please summarize this chat session concisely in about 100-150 words. Include:
 - User's emotional state
 - Key topics discussed
 - Any cognitive patterns or distortions identified
