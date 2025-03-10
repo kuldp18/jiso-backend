@@ -1,4 +1,6 @@
+import { createChatSummary } from "../ai/chat.ai.js";
 import { summarizeJournal } from "../ai/journal.ai.js";
+import { Chat } from "../models/chat.model.js";
 import { Journal } from "../models/journal.model.js";
 
 // User Contexts
@@ -65,6 +67,7 @@ export const summarizePendingJournals = async (req, res) => {
       });
     }
 
+    // TODO : ONLY GET JOURNALS OF USERS THAT HAVE VERIFIED EMAIL
     // get journals with pending or error status
     const pendingJournals = await Journal.find({
       summaryStatus: { $in: ["pending", "error"] },
@@ -90,6 +93,47 @@ export const summarizePendingJournals = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || "An error occurred while summarizing journals.",
+    });
+  }
+};
+
+// Chats
+export const summarizePendingChats = async (req, res) => {
+  const apiKey = req.headers["x-api-key"];
+
+  try {
+    if (!apiKey || apiKey !== process.env.CRON_API_KEY) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Valid API key is required.",
+      });
+    }
+
+    // get chats with pending or error status
+    const pendingChats = await Chat.find({
+      summaryStatus: { $in: ["pending", "error"] },
+    });
+
+    if (pendingChats.length === 0) {
+      return;
+    }
+
+    // loop through pending chats and summarize them
+    for (let chat of pendingChats) {
+      //summarize chat
+      await createChatSummary(chat);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Summarized all pending chats.",
+      count: pendingChats.length,
+      entries: pendingChats,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "An error occurred while summarizing chats.",
     });
   }
 };

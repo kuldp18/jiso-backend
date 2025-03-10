@@ -46,7 +46,7 @@ const chatSchema = new mongoose.Schema(
 
     summaryStatus: {
       type: String,
-      enum: ["pending", "completed", "error"],
+      enum: ["pending", "complete", "error"],
       default: "pending",
     },
   },

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Chat } from "../models/chat.model.js";
 import { UserContext } from "../models/usercontext.model.js";
-import { getTherapistResponse } from "../ai/chat.ai.js";
+import { getChatResponse } from "../ai/chat.ai.js";
 
 // create new chat
 export const createChat = async (req, res) => {
@@ -82,7 +82,7 @@ export const sendMessage = async (req, res) => {
 
     // ask AI for response
 
-    const therapistResponse = await getTherapistResponse(message, history);
+    const therapistResponse = await getChatResponse(message, history);
 
     if (!therapistResponse) {
       return res.status(500).json({

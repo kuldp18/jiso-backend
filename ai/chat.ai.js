@@ -21,7 +21,8 @@ Always respond in a conversational, compassionate manner. Avoid being overly for
 Never give harmful advice or encourage destructive behaviors. If someone appears in crisis, gently suggest professional in-person help. Don't diagnose medical or psychiatric conditions.`,
 };
 
-export const getTherapistResponse = async (message, history = []) => {
+// get chat response from AI
+export const getChatResponse = async (message, history = []) => {
   try {
     const completion = await openai.chat.completions.create({
       model: process.env.AI_MODEL_NAME,
@@ -34,8 +35,62 @@ export const getTherapistResponse = async (message, history = []) => {
     return result;
   } catch (error) {
     console.error(
-      `Error getting therapist response for message: ${message}: ${error.message}`
+      `Error getting chat response for message: ${message}: ${error.message}`
     );
     return null;
+  }
+};
+
+//  create chat summary
+export const createChatSummary = async (chat) => {
+  const chatTranscript = chat.messages
+    .map((msg) => {
+      const senderLabel = msg.sender === "user" ? "User" : "Ana";
+      return `${senderLabel}: ${msg.content}`;
+    })
+    .join("\n");
+
+  const summaryPrompt = {
+    role: "user",
+    content: `Here is a transcript of a CBT therapy chat session between Ana and the user:
+
+${chatTranscript}
+
+Please summarize this chat session. Include:
+- User's emotional state
+- Key topics discussed
+- Any cognitive patterns or distortions identified
+- CBT techniques or strategies Ana used
+- Any progress or shift in thinking
+- Suggestions or goals for next chat session
+
+Important: Don't include phrases like "In this chat session...", 'As an AI therapist...", or "The user said..." etc. Create a narrative summary as if you're reflecting on the chat session.
+
+Keep it concise, warm, and emotionally aware. Write the summary like Ana reflecting on the chat session, not like a generic report.`,
+  };
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: process.env.AI_MODEL_NAME,
+      messages: [systemPrompt, summaryPrompt],
+      temperature: 0.7,
+    });
+
+    const result = completion.choices[0].message.content;
+
+    if (!result) {
+      chat.summaryStatus = "error";
+      await chat.save();
+    }
+
+    chat.summary = result;
+    chat.summaryStatus = "complete";
+    await chat.save();
+  } catch (error) {
+    console.error(
+      `Error getting chat summary for chat ${chat._id}: ${error.message}`
+    );
+    chat.summaryStatus = "error";
+    await chat.save();
   }
 };
