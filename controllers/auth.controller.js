@@ -448,6 +448,7 @@ export const checkAuth = async (req, res) => {
         id: user.id,
         name: user.fullName,
         email: user.email,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (error) {
