@@ -8,6 +8,38 @@ const userContextSchema = new mongoose.Schema(
       required: true,
     },
 
+    lastWeeklyUpdate: {
+      type: Date,
+      default: null,
+    },
+
+    lastWeeklyUpdateStatus: {
+      type: String,
+      enum: ["pending", "complete", "error"],
+      default: "pending",
+    },
+
+    lastWeeklyUpdateError: {
+      type: String,
+      default: null,
+    },
+
+    lastMonthlyUpdate: {
+      type: Date,
+      default: null,
+    },
+
+    lastMonthlyUpdateStatus: {
+      type: String,
+      enum: ["pending", "complete", "error"],
+      default: "pending",
+    },
+
+    lastMonthlyUpdateError: {
+      type: String,
+      default: null,
+    },
+
     goals: {
       type: [
         {
