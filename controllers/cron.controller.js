@@ -1,35 +1,95 @@
 import { createChatSummary } from "../ai/chat.ai.js";
+import { getWeeklyContextThemes } from "../ai/context.ai.js";
 import { summarizeJournal } from "../ai/journal.ai.js";
 import { Chat } from "../models/chat.model.js";
 import { Journal } from "../models/journal.model.js";
+import { User } from "../models/user.model.js";
+import { UserContext } from "../models/usercontext.model.js";
+import { fetchLastWeekChatSummaries } from "../utils/chat.utils.js";
+import { fetchLastWeekJournalSummaries } from "../utils/journal.utils.js";
+import { fetchLastWeekMoods } from "../utils/mood.utils.js";
 
 // User Contexts
 
 export const updateUserContextsWeekly = async (req, res) => {
   const apiKey = req.headers["x-api-key"];
 
-  if (!apiKey || apiKey !== process.env.CRON_API_KEY) {
-    return res.status(401).json({
+  try {
+    if (!apiKey || apiKey !== process.env.CRON_API_KEY) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Valid API key is required.",
+      });
+    }
+
+    const users = await User.find({ isEmailVerified: true });
+
+    if (users.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No verified users found.",
+      });
+    }
+
+    // loop through users and update their contexts
+    for (let user of users) {
+      const userContext = await UserContext.findOne({
+        userId: user._id,
+      });
+
+      if (!userContext) {
+        continue;
+      }
+
+      // fetch relevant last week data
+      const moods = await fetchLastWeekMoods(user._id);
+      const journals = await fetchLastWeekJournalSummaries(user._id);
+      const chats = await fetchLastWeekChatSummaries(user._id);
+      const goals = userContext.goals;
+      const struggles = userContext.struggles;
+
+      const basicInfo = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        age: user.age,
+        gender: user.gender,
+      };
+
+      const contextObj = {
+        basicInfo,
+        moods,
+        journals,
+        chats,
+        goals,
+        struggles,
+      };
+
+      console.log(`Context object for user ${user._id}: `, contextObj);
+
+      // feed data to AI model
+      const { moodThemes, chatThemes, journalThemes } =
+        await getWeeklyContextThemes(contextObj);
+
+      // update user context with new themes
+      userContext.moodThemes.weekly.push(moodThemes);
+      userContext.chatThemes.weekly.push(chatThemes);
+      userContext.journalThemes.weekly.push(journalThemes);
+
+      const updatedContext = await userContext.save();
+
+      res.status(200).json({
+        success: true,
+        message: `Updated user context for user ${user._id}.`,
+        context: updatedContext,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: "Unauthorized. Valid API key is required.",
+      message:
+        error.message || "An error occurred while updating user contexts.",
     });
   }
-  /*
-    Plan:
-    1. Get all users
-    2. For each user:
-        - Grab user context
-        - Fetch summaries of all journals from the last 7 days
-        - Calculate mood themes for the week
-        - Grab chat summaries from the last 7 days
-        - Grab goals and struggles from the context
-        - Join all the above data
-        - Feed the data to the AI model
-        - Get journal themes, mood themes, and chat themes
-        - Update the user context with the new weekly themes
-
-    3. Return completion or error message
-  */
 };
 
 export const updateUserContextsMonthly = async (req, res) => {};
@@ -72,7 +132,7 @@ export const summarizePendingJournals = async (req, res) => {
       summaryStatus: { $in: ["pending", "error"] },
     }).populate({
       path: "userId",
-      select: "isEmailVerified",
+      select: "isEmailVerified firstName lastName",
       match: { isEmailVerified: true },
     });
 

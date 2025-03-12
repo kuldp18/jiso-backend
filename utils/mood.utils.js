@@ -19,6 +19,7 @@ export const fetchLastWeekMoods = async (userId) => {
       return {
         emotions: mood.emotions.join(", "),
         description: mood.description || "none",
+        date: mood.createdAt.toDateString(),
       };
     });
 
