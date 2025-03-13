@@ -489,6 +489,7 @@ export const updateUserInsightsWeekly = async (req, res) => {
     });
   }
 };
+
 export const updateUserInsightsMonthly = async (req, res) => {
   const apiKey = req.headers["x-api-key"];
 
@@ -505,9 +506,9 @@ export const updateUserInsightsMonthly = async (req, res) => {
 
     const insightsToUpdate = await Insight.find({
       $or: [
-        { lastWeeklyUpdateStatus: { $in: ["pending", "error"] } },
-        { lastWeeklyUpdate: null },
-        { lastWeeklyUpdate: { $lt: lastMonth } },
+        { lastMonthlyUpdateStatus: { $in: ["pending", "error"] } },
+        { lastMonthlyUpdate: null },
+        { lastMonthlyUpdate: { $lt: lastMonth } },
       ],
     }).populate({
       path: "userId",
@@ -576,7 +577,7 @@ export const updateUserInsightsMonthly = async (req, res) => {
 
         // update user insights with new insights
         insights.forEach((item) => {
-          insight.weekly.push({
+          insight.monthly.push({
             insight: item.insight,
             description: item.description,
           });
