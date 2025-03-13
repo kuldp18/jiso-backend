@@ -3,7 +3,6 @@ import { getWeeklyContextThemes } from "../ai/context.ai.js";
 import { summarizeJournal } from "../ai/journal.ai.js";
 import { Chat } from "../models/chat.model.js";
 import { Journal } from "../models/journal.model.js";
-import { User } from "../models/user.model.js";
 import { UserContext } from "../models/usercontext.model.js";
 import { fetchLastWeekChatSummaries } from "../utils/chat.utils.js";
 import { fetchLastWeekJournalSummaries } from "../utils/journal.utils.js";
@@ -22,69 +21,136 @@ export const updateUserContextsWeekly = async (req, res) => {
       });
     }
 
-    const users = await User.find({ isEmailVerified: true });
+    // Find contexts that need updating based on three cases:
+    // 1. Contexts with status "pending" or "error"
+    // 2. Contexts with no last update timestamp (lastWeeklyUpdate is null)
+    // 3. Contexts not updated in the last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    if (users.length === 0) {
+    const contextsToUpdate = await UserContext.find({
+      $or: [
+        { lastWeeklyUpdateStatus: { $in: ["pending", "error"] } },
+        { lastWeeklyUpdate: null },
+        { lastWeeklyUpdate: { $lt: sevenDaysAgo } },
+      ],
+    }).populate({
+      path: "userId",
+      select: "firstName lastName age gender isEmailVerified",
+      match: { isEmailVerified: true },
+    });
+
+    // Filter out contexts whose users are null or not verified
+    const verifiedContexts = contextsToUpdate.filter(
+      (context) => context.userId && context.userId.isEmailVerified
+    );
+
+    if (verifiedContexts.length === 0) {
       return res.status(200).json({
         success: true,
-        message: "No verified users found.",
+        message: "No user contexts need updating at this time.",
       });
     }
 
-    // loop through users and update their contexts
-    for (let user of users) {
-      const userContext = await UserContext.findOne({
-        userId: user._id,
-      });
+    const results = {
+      successful: [],
+      failed: [],
+    };
 
-      if (!userContext) {
-        continue;
+    // Process each context
+    for (let context of verifiedContexts) {
+      try {
+        const userId = context.userId._id;
+
+        console.log(`Processing weekly update for user ${userId}...`);
+
+        // Check if there's enough data to generate themes
+        const moods = await fetchLastWeekMoods(userId);
+        const journals = await fetchLastWeekJournalSummaries(userId);
+        const chats = await fetchLastWeekChatSummaries(userId);
+
+        // Mark as pending before processing
+        context.lastWeeklyUpdateStatus = "pending";
+        await context.save();
+
+        const goals = context.goals || [];
+        const struggles = context.struggles || [];
+
+        const basicInfo = {
+          firstName: context.userId.firstName || "",
+          lastName: context.userId.lastName || "",
+          age: context.userId.age || null,
+          gender: context.userId.gender || "",
+        };
+
+        const contextObj = {
+          basicInfo,
+          moods,
+          journals,
+          chats,
+          goals,
+          struggles,
+        };
+
+        console.log("Context object:", contextObj);
+
+        // feed data to AI model
+        const { moodThemes, chatThemes, journalThemes } =
+          await getWeeklyContextThemes(contextObj);
+
+        // update user context with new themes
+        context.moodThemes.weekly.push(moodThemes);
+        context.chatThemes.weekly.push(chatThemes);
+        context.journalThemes.weekly.push(journalThemes);
+
+        // Update status info
+        context.lastWeeklyUpdate = new Date();
+        context.lastWeeklyUpdateStatus = "complete";
+        context.lastWeeklyUpdateError = null;
+
+        await context.save();
+
+        results.successful.push({
+          userId,
+          contextId: context._id,
+        });
+      } catch (error) {
+        console.error(
+          `Error updating context for user ${context.userId?._id}:`,
+          error
+        );
+
+        // Update error status
+        try {
+          context.lastWeeklyUpdateStatus = "error";
+          context.lastWeeklyUpdateError = error.message || "Unknown error";
+          await context.save();
+        } catch (saveError) {
+          console.error("Error updating context error status:", saveError);
+        }
+
+        results.failed.push({
+          userId: context.userId?._id || context.userId,
+          contextId: context._id,
+          error: error.message || "Unknown error",
+        });
       }
-
-      // fetch relevant last week data
-      const moods = await fetchLastWeekMoods(user._id);
-      const journals = await fetchLastWeekJournalSummaries(user._id);
-      const chats = await fetchLastWeekChatSummaries(user._id);
-      const goals = userContext.goals;
-      const struggles = userContext.struggles;
-
-      const basicInfo = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        age: user.age,
-        gender: user.gender,
-      };
-
-      const contextObj = {
-        basicInfo,
-        moods,
-        journals,
-        chats,
-        goals,
-        struggles,
-      };
-
-      console.log(`Context object for user ${user._id}: `, contextObj);
-
-      // feed data to AI model
-      const { moodThemes, chatThemes, journalThemes } =
-        await getWeeklyContextThemes(contextObj);
-
-      // update user context with new themes
-      userContext.moodThemes.weekly.push(moodThemes);
-      userContext.chatThemes.weekly.push(chatThemes);
-      userContext.journalThemes.weekly.push(journalThemes);
-
-      const updatedContext = await userContext.save();
-
-      res.status(200).json({
-        success: true,
-        message: `Updated user context for user ${user._id}.`,
-        context: updatedContext,
-      });
     }
+
+    return res.status(200).json({
+      success: true,
+      message: `Weekly context update processed ${verifiedContexts.length} contexts`,
+      results: {
+        total: verifiedContexts.length,
+        successful: results.successful.length,
+        failed: results.failed.length,
+        successfulContexts: results.successful,
+        failedContexts: results.failed,
+      },
+    });
   } catch (error) {
-    res.status(500).json({
+    console.error("Global error in updateUserContextsWeekly:", error);
+    return res.status(500).json({
       success: false,
       message:
         error.message || "An error occurred while updating user contexts.",
