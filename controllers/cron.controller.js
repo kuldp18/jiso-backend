@@ -24,8 +24,13 @@ import {
   fetchLastMonthMoods,
   fetchLastWeekMoods,
 } from "../utils/mood.utils.js";
-import { fetchWeeklyThemeBatch } from "../utils/context.utils.js";
-import { getWeeklyInsights } from "../ai/insight.ai.js";
+
+import {
+  fetchMonthlyThemeBatch,
+  fetchWeeklyThemeBatch,
+} from "../utils/context.utils.js";
+
+import { getMonthlyInsights, getWeeklyInsights } from "../ai/insight.ai.js";
 
 // User Contexts
 
@@ -374,12 +379,11 @@ export const updateUserInsightsWeekly = async (req, res) => {
     for (let insight of verifiedInsights) {
       try {
         const userId = insight.userId._id;
-        const contextId = insight.userContext?._id;
 
         console.log(`Processing weekly insight update for user ${userId}...`);
 
         // Fetch relevant data for the last week
-        const context = await UserContext.findById(contextId);
+        const context = await UserContext.findOne({ userId });
 
         if (!context) {
           throw new Error("User context not found");
@@ -474,8 +478,152 @@ export const updateUserInsightsWeekly = async (req, res) => {
     });
   }
 };
+export const updateUserInsightsMonthly = async (req, res) => {
+  const apiKey = req.headers["x-api-key"];
 
-export const updateUserInsightsMonthly = async (req, res) => {};
+  try {
+    if (!apiKey || apiKey !== process.env.CRON_API_KEY) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Valid API key is required.",
+      });
+    }
+
+    const lastMonth = new Date();
+    lastMonth.setDate(lastMonth.getDate() - 30);
+
+    const insightsToUpdate = await Insight.find({
+      $or: [
+        { lastWeeklyUpdateStatus: { $in: ["pending", "error"] } },
+        { lastWeeklyUpdate: null },
+        { lastWeeklyUpdate: { $lt: lastMonth } },
+      ],
+    }).populate({
+      path: "userId",
+      select: "firstName lastName age gender isEmailVerified",
+      match: { isEmailVerified: true },
+    });
+
+    // Filter out insights whose users are null or not verified
+    const verifiedInsights = insightsToUpdate.filter(
+      (insight) => insight.userId && insight.userId.isEmailVerified
+    );
+
+    if (verifiedInsights.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No user insights need updating at this time.",
+      });
+    }
+
+    const results = {
+      successful: [],
+      failed: [],
+    };
+
+    // process each insight
+    for (let insight of verifiedInsights) {
+      try {
+        const userId = insight.userId._id;
+
+        console.log(`Processing monthly insight update for user ${userId}...`);
+
+        // Fetch relevant data for the last week
+        const context = await UserContext.findOne({ userId });
+
+        if (!context) {
+          throw new Error("User context not found");
+        }
+
+        const goals = context.goals || [];
+        const struggles = context.struggles || [];
+
+        const basicInfo = {
+          firstName: insight.userId.firstName || "",
+          lastName: insight.userId.lastName || "",
+          age: insight.userId.age || null,
+          gender: insight.userId.gender || "",
+        };
+
+        console.log("Basic info:", basicInfo);
+
+        const themes = await fetchMonthlyThemeBatch(context);
+
+        console.log("Themes:", themes);
+
+        const insightObj = {
+          basicInfo,
+          goals,
+          struggles,
+          themes,
+        };
+
+        console.log("Insight object:", insightObj);
+
+        // feed data to AI model
+        const { insights, suggestions } = await getMonthlyInsights(insightObj);
+
+        // update user insights with new insights
+        insight.monthly.push([...insights]);
+        insight.suggestions.push([...suggestions]);
+
+        // Update status info
+        insight.lastMonthlyUpdate = new Date();
+        insight.lastMonthlyUpdateStatus = "complete";
+        insight.lastMonthlyUpdateError = null;
+
+        await insight.save();
+
+        results.successful.push({
+          userId,
+          insightId: insight._id,
+        });
+      } catch (error) {
+        // update error status
+
+        try {
+          insight.lastMonthlyUpdate = new Date();
+          insight.lastMonthlyUpdateStatus = "error";
+          insight.lastMonthlyUpdateError = error.message || "Unknown error";
+
+          await insight.save();
+
+          console.error(
+            `Error updating monthly insight for user ${insight.userId?._id}:`,
+            error
+          );
+        } catch (error) {
+          console.error("Error updating insight error status:", error);
+        }
+
+        results.failed.push({
+          userId: insight.userId?._id || insight.userId,
+          insightId: insight._id,
+          error: error.message || "Unknown error",
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Monthly insight update processed ${verifiedInsights.length} insights`,
+      results: {
+        total: verifiedInsights.length,
+        successful: results.successful.length,
+        failed: results.failed.length,
+        successfulInsights: results.successful,
+        failedInsights: results.failed,
+      },
+    });
+  } catch (error) {
+    console.error("Global error in updateUserInsightsMonthly:", error);
+    return res.status(500).json({
+      success: false,
+      message:
+        error.message || "An error occurred while updating user insights.",
+    });
+  }
+};
 
 //Journals
 
