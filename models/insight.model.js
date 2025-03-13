@@ -13,6 +13,38 @@ const insightSchema = new mongoose.Schema(
       ref: "UserContext",
     },
 
+    lastWeeklyUpdate: {
+      type: Date,
+      default: null,
+    },
+
+    lastWeeklyUpdateStatus: {
+      type: String,
+      enum: ["pending", "complete", "error"],
+      default: "pending",
+    },
+
+    lastWeeklyUpdateError: {
+      type: String,
+      default: null,
+    },
+
+    lastMonthlyUpdate: {
+      type: Date,
+      default: null,
+    },
+
+    lastMonthlyUpdateStatus: {
+      type: String,
+      enum: ["pending", "complete", "error"],
+      default: "pending",
+    },
+
+    lastMonthlyUpdateError: {
+      type: String,
+      default: null,
+    },
+
     weekly: {
       type: [
         {

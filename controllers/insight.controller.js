@@ -1,11 +1,23 @@
 import { Insight } from "../models/insight.model.js";
+import { UserContext } from "../models/usercontext.model.js";
 
 // created automatically on user signup
 export const createDefaultInsight = async (userId) => {
   try {
-    const insight = await Insight.create({ userId });
+    const userContext = await UserContext.findOne({ userId });
 
-    await insight.save();
+    if (!userContext) {
+      const insight = await Insight.create({ userId });
+
+      await insight.save();
+    } else {
+      const insight = await Insight.create({
+        userId,
+        userContext: userContext._id,
+      });
+
+      await insight.save();
+    }
   } catch (error) {
     console.error(
       `Something went wrong while creating default insight: ${error}`

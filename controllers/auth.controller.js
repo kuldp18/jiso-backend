@@ -69,10 +69,10 @@ export const signup = async (req, res) => {
     // send verification email
     await sendEmailVerificationEmail(user);
 
-    // create default insight document
-    await createDefaultInsight(user._id);
     // create default user context
     await createDefaultUserContext(user._id);
+    // create default insight document
+    await createDefaultInsight(user._id);
 
     return res.status(201).json({
       success: true,
