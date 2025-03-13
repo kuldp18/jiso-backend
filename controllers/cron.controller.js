@@ -418,8 +418,19 @@ export const updateUserInsightsWeekly = async (req, res) => {
         const { insights, suggestions } = await getWeeklyInsights(insightObj);
 
         // update user insights with new insights
-        insight.weekly.push([...insights]);
-        insight.suggestions.push([...suggestions]);
+        insights.forEach((item) => {
+          insight.weekly.push({
+            insight: item.insight,
+            description: item.description,
+          });
+        });
+
+        suggestions.forEach((item) => {
+          insight.suggestions.push({
+            suggestion: item.suggestion,
+            description: item.description,
+          });
+        });
 
         // Update status info
         insight.lastWeeklyUpdate = new Date();
@@ -564,8 +575,19 @@ export const updateUserInsightsMonthly = async (req, res) => {
         const { insights, suggestions } = await getMonthlyInsights(insightObj);
 
         // update user insights with new insights
-        insight.monthly.push([...insights]);
-        insight.suggestions.push([...suggestions]);
+        insights.forEach((item) => {
+          insight.weekly.push({
+            insight: item.insight,
+            description: item.description,
+          });
+        });
+
+        suggestions.forEach((item) => {
+          insight.suggestions.push({
+            suggestion: item.suggestion,
+            description: item.description,
+          });
+        });
 
         // Update status info
         insight.lastMonthlyUpdate = new Date();
@@ -696,7 +718,10 @@ export const summarizePendingChats = async (req, res) => {
     });
 
     if (pendingChats.length === 0) {
-      return;
+      return res.status(200).json({
+        success: true,
+        message: "No pending chats found to summarize.",
+      });
     }
 
     // loop through pending chats and summarize them
