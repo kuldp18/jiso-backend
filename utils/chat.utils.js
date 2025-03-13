@@ -28,3 +28,32 @@ export const fetchLastWeekChatSummaries = async (userId) => {
     return [];
   }
 };
+
+// get last month chat summaries
+export const fetchLastMonthChatSummaries = async (userId) => {
+  try {
+    const chats = await Chat.find({
+      userId,
+      summaryStatus: "complete",
+      createdAt: {
+        $gte: new Date(new Date().setDate(new Date().getDate() - 30)),
+      },
+    });
+
+    if (!chats || chats.length === 0) {
+      return [];
+    }
+
+    const parsedChats = chats.map((chat) => {
+      return {
+        summary: chat.summary,
+        date: chat.createdAt.toDateString(),
+      };
+    });
+
+    return parsedChats;
+  } catch (error) {
+    console.error("Error fetching last month chat summaries: ", error);
+    return [];
+  }
+};

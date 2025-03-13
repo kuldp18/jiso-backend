@@ -1,5 +1,5 @@
-// User Context - Update weekly themes
-export const contextBuilderWeekly = (contextObj) => {
+// User Context - Update weekly and monthly themes
+export const userContextBuilder = (contextObj) => {
   const { basicInfo, moods, journals, chats, goals, struggles } = contextObj;
 
   const { firstName, lastName, age, gender } = basicInfo;

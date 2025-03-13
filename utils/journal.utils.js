@@ -30,3 +30,33 @@ export const fetchLastWeekJournalSummaries = async (userId) => {
     return [];
   }
 };
+
+// fetch last month journal summaries
+export const fetchLastMonthJournalSummaries = async (userId) => {
+  try {
+    const journals = await Journal.find({
+      userId,
+      summaryStatus: "complete",
+      createdAt: {
+        $gte: new Date(new Date().setDate(new Date().getDate() - 30)),
+      },
+    });
+
+    if (!journals || journals.length === 0) {
+      return [];
+    }
+
+    const parsedJournals = journals.map((journal) => {
+      return {
+        summaries: journal.summaries,
+        emotions: journal.emotions?.join(", ") || "none",
+        date: journal.createdAt.toDateString(),
+      };
+    });
+
+    return parsedJournals;
+  } catch (error) {
+    console.error("Error fetching last month journal summaries: ", error);
+    return [];
+  }
+};

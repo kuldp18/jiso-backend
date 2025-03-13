@@ -1,12 +1,28 @@
 import { createChatSummary } from "../ai/chat.ai.js";
-import { getWeeklyContextThemes } from "../ai/context.ai.js";
+import {
+  getMonthlyContextThemes,
+  getWeeklyContextThemes,
+} from "../ai/context.ai.js";
+
 import { summarizeJournal } from "../ai/journal.ai.js";
 import { Chat } from "../models/chat.model.js";
 import { Journal } from "../models/journal.model.js";
 import { UserContext } from "../models/usercontext.model.js";
-import { fetchLastWeekChatSummaries } from "../utils/chat.utils.js";
-import { fetchLastWeekJournalSummaries } from "../utils/journal.utils.js";
-import { fetchLastWeekMoods } from "../utils/mood.utils.js";
+
+import {
+  fetchLastMonthChatSummaries,
+  fetchLastWeekChatSummaries,
+} from "../utils/chat.utils.js";
+
+import {
+  fetchLastMonthJournalSummaries,
+  fetchLastWeekJournalSummaries,
+} from "../utils/journal.utils.js";
+
+import {
+  fetchLastMonthMoods,
+  fetchLastWeekMoods,
+} from "../utils/mood.utils.js";
 
 // User Contexts
 
@@ -158,7 +174,153 @@ export const updateUserContextsWeekly = async (req, res) => {
   }
 };
 
-export const updateUserContextsMonthly = async (req, res) => {};
+export const updateUserContextsMonthly = async (req, res) => {
+  const apiKey = req.headers["x-api-key"];
+
+  try {
+    if (!apiKey || apiKey !== process.env.CRON_API_KEY) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Valid API key is required.",
+      });
+    }
+
+    // Find contexts that need updating based on three cases:
+    // 1. Contexts with status "pending" or "error"
+    // 2. Contexts with no last update timestamp (lastMonthlyUpdate is null)
+    // 3. Contexts not updated in the last 30 days
+    const lastMonth = new Date();
+    lastMonth.setDate(lastMonth.getDate() - 30);
+
+    const contextsToUpdate = await UserContext.find({
+      $or: [
+        { lastMonthlyUpdateStatus: { $in: ["pending", "error"] } },
+        { lastMonthlyUpdate: null },
+        { lastMonthlyUpdate: { $lt: lastMonth } },
+      ],
+    }).populate({
+      path: "userId",
+      select: "firstName lastName age gender isEmailVerified",
+      match: { isEmailVerified: true },
+    });
+
+    // Filter out contexts whose users are null or not verified
+    const verifiedContexts = contextsToUpdate.filter(
+      (context) => context.userId && context.userId.isEmailVerified
+    );
+
+    if (verifiedContexts.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No user contexts need updating at this time.",
+      });
+    }
+
+    const results = {
+      successful: [],
+      failed: [],
+    };
+
+    // Process each context
+    for (let context of verifiedContexts) {
+      try {
+        const userId = context.userId._id;
+
+        console.log(`Processing monthly update for user ${userId}...`);
+
+        // Check if there's enough data to generate themes
+        const moods = await fetchLastMonthMoods(userId);
+        const journals = await fetchLastMonthJournalSummaries(userId);
+        const chats = await fetchLastMonthChatSummaries(userId);
+
+        // Mark as pending before processing
+        context.lastMonthlyUpdateStatus = "pending";
+        await context.save();
+
+        const goals = context.goals || [];
+        const struggles = context.struggles || [];
+
+        const basicInfo = {
+          firstName: context.userId.firstName || "",
+          lastName: context.userId.lastName || "",
+          age: context.userId.age || null,
+          gender: context.userId.gender || "",
+        };
+
+        const contextObj = {
+          basicInfo,
+          moods,
+          journals,
+          chats,
+          goals,
+          struggles,
+        };
+
+        console.log("Context object:", contextObj);
+
+        // feed data to AI model
+        const { moodThemes, chatThemes, journalThemes } =
+          await getMonthlyContextThemes(contextObj);
+
+        // update user context with new themes
+        context.moodThemes.monthly.push(moodThemes);
+        context.chatThemes.monthly.push(chatThemes);
+        context.journalThemes.monthly.push(journalThemes);
+
+        // Update status info
+        context.lastMonthlyUpdate = new Date();
+        context.lastMonthlyUpdateStatus = "complete";
+        context.lastMonthlyUpdateError = null;
+
+        await context.save();
+
+        results.successful.push({
+          userId,
+          contextId: context._id,
+        });
+      } catch (error) {
+        console.error(
+          `Error updating context for user ${context.userId?._id}:`,
+          error
+        );
+
+        // Update error status
+        try {
+          context.lastMonthlyUpdateStatus = "error";
+          context.lastMonthlyUpdateError = error.message || "Unknown error";
+          await context.save();
+        } catch (saveError) {
+          console.error("Error updating context error status:", saveError);
+        }
+
+        results.failed.push({
+          userId: context.userId?._id || context.userId,
+          contextId: context._id,
+          error: error.message || "Unknown error",
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Monthly context update processed ${verifiedContexts.length} contexts`,
+      results: {
+        total: verifiedContexts.length,
+        successful: results.successful.length,
+        failed: results.failed.length,
+        successfulContexts: results.successful,
+        failedContexts: results.failed,
+      },
+    });
+  } catch (error) {
+    console.error("Global error in updateUserContextsWeekly:", error);
+    return res.status(500).json({
+      success: false,
+      message:
+        error.message || "An error occurred while updating user contexts.",
+    });
+  }
+};
 
 // User Insights
 
