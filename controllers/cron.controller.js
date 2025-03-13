@@ -8,6 +8,7 @@ import { summarizeJournal } from "../ai/journal.ai.js";
 import { Chat } from "../models/chat.model.js";
 import { Journal } from "../models/journal.model.js";
 import { UserContext } from "../models/usercontext.model.js";
+import { Insight } from "../models/insight.model.js";
 
 import {
   fetchLastMonthChatSummaries,
@@ -23,6 +24,8 @@ import {
   fetchLastMonthMoods,
   fetchLastWeekMoods,
 } from "../utils/mood.utils.js";
+import { fetchWeeklyThemeBatch } from "../utils/context.utils.js";
+import { getWeeklyInsights } from "../ai/insight.ai.js";
 
 // User Contexts
 
@@ -80,7 +83,7 @@ export const updateUserContextsWeekly = async (req, res) => {
 
         console.log(`Processing weekly update for user ${userId}...`);
 
-        // Check if there's enough data to generate themes
+        // Fetch relevant data for the last week
         const moods = await fetchLastWeekMoods(userId);
         const journals = await fetchLastWeekJournalSummaries(userId);
         const chats = await fetchLastWeekChatSummaries(userId);
@@ -325,19 +328,151 @@ export const updateUserContextsMonthly = async (req, res) => {
 // User Insights
 
 export const updateUserInsightsWeekly = async (req, res) => {
-  /*
-    Plan:
-    1. Get all users
-    2. For each user:
-        - Grab user context
-        - Get all the themes of last week
-        - Get struggles and goals
-        - Get all the insights of last week (if any)
-        - Feed the data to the AI model
-        - Get insights for the week
-        - Update the user context with the new weekly insights
-    3. Return completion or error message
-    */
+  const apiKey = req.headers["x-api-key"];
+
+  try {
+    if (!apiKey || apiKey !== process.env.CRON_API_KEY) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Valid API key is required.",
+      });
+    }
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const insightsToUpdate = await Insight.find({
+      $or: [
+        { lastWeeklyUpdateStatus: { $in: ["pending", "error"] } },
+        { lastWeeklyUpdate: null },
+        { lastWeeklyUpdate: { $lt: sevenDaysAgo } },
+      ],
+    }).populate({
+      path: "userId",
+      select: "firstName lastName age gender isEmailVerified",
+      match: { isEmailVerified: true },
+    });
+
+    // Filter out insights whose users are null or not verified
+    const verifiedInsights = insightsToUpdate.filter(
+      (insight) => insight.userId && insight.userId.isEmailVerified
+    );
+
+    if (verifiedInsights.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No user insights need updating at this time.",
+      });
+    }
+
+    const results = {
+      successful: [],
+      failed: [],
+    };
+
+    // process each insight
+    for (let insight of verifiedInsights) {
+      try {
+        const userId = insight.userId._id;
+        const contextId = insight.userContext?._id;
+
+        console.log(`Processing weekly insight update for user ${userId}...`);
+
+        // Fetch relevant data for the last week
+        const context = await UserContext.findById(contextId);
+
+        if (!context) {
+          throw new Error("User context not found");
+        }
+
+        const goals = context.goals || [];
+        const struggles = context.struggles || [];
+
+        const basicInfo = {
+          firstName: insight.userId.firstName || "",
+          lastName: insight.userId.lastName || "",
+          age: insight.userId.age || null,
+          gender: insight.userId.gender || "",
+        };
+
+        console.log("Basic info:", basicInfo);
+
+        const themes = await fetchWeeklyThemeBatch(context);
+
+        console.log("Themes:", themes);
+
+        const insightObj = {
+          basicInfo,
+          goals,
+          struggles,
+          themes,
+        };
+
+        console.log("Insight object:", insightObj);
+
+        // feed data to AI model
+        const { insights, suggestions } = await getWeeklyInsights(insightObj);
+
+        // update user insights with new insights
+        insight.weekly.push([...insights]);
+        insight.suggestions.push([...suggestions]);
+
+        // Update status info
+        insight.lastWeeklyUpdate = new Date();
+        insight.lastWeeklyUpdateStatus = "complete";
+        insight.lastWeeklyUpdateError = null;
+
+        await insight.save();
+
+        results.successful.push({
+          userId,
+          insightId: insight._id,
+        });
+      } catch (error) {
+        // update error status
+
+        try {
+          insight.lastWeeklyUpdate = new Date();
+          insight.lastWeeklyUpdateStatus = "error";
+          insight.lastWeeklyUpdateError = error.message || "Unknown error";
+
+          await insight.save();
+
+          console.error(
+            `Error updating weekly insight for user ${insight.userId?._id}:`,
+            error
+          );
+        } catch (error) {
+          console.error("Error updating insight error status:", error);
+        }
+
+        results.failed.push({
+          userId: insight.userId?._id || insight.userId,
+          insightId: insight._id,
+          error: error.message || "Unknown error",
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Weekly insight update processed ${verifiedInsights.length} insights`,
+      results: {
+        total: verifiedInsights.length,
+        successful: results.successful.length,
+        failed: results.failed.length,
+        successfulInsights: results.successful,
+        failedInsights: results.failed,
+      },
+    });
+  } catch (error) {
+    console.error("Global error in updateUserInsightsWeekly:", error);
+    return res.status(500).json({
+      success: false,
+      message:
+        error.message || "An error occurred while updating user insights.",
+    });
+  }
 };
 
 export const updateUserInsightsMonthly = async (req, res) => {};

@@ -1,11 +1,7 @@
-import { UserContext } from "../models/usercontext.model.js";
-
 // fetch weekly context themes in a batch of n
 
-export const fetchWeeklyContextBatch = async (userId, n = 4) => {
+export const fetchWeeklyThemeBatch = async (userContext, n = 4) => {
   try {
-    const userContext = await UserContext.findOne({ userId });
-
     if (!userContext) {
       return [];
     }
@@ -37,10 +33,8 @@ export const fetchWeeklyContextBatch = async (userId, n = 4) => {
 };
 
 // fetch monthly context themes in a batch of n
-export const fetchMonthlyContextBatch = async (userId, n = 6) => {
+export const fetchMonthlyThemeBatch = async (userContext, n = 6) => {
   try {
-    const userContext = await UserContext.findOne({ userId });
-
     if (!userContext) {
       return [];
     }
