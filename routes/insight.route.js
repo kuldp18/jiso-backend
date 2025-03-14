@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware.js";
-import { getUserInsight } from "../controllers/insight.controller.js";
+import {
+  getUserInsight,
+  clearUserInsights,
+} from "../controllers/insight.controller.js";
 
 const router = Router();
 
@@ -8,5 +11,6 @@ const router = Router();
 router.use(verifyToken);
 
 router.get("/current", getUserInsight);
+router.patch("/clear", clearUserInsights);
 
 export default router;

@@ -50,3 +50,41 @@ export const getUserInsight = async (req, res) => {
     });
   }
 };
+
+// clear user insights
+
+export const clearUserInsights = async (req, res) => {
+  try {
+    const userInsight = await Insight.findOne({ userId: req.userId });
+
+    if (!userInsight) {
+      return res.status(404).json({
+        success: false,
+        message: "Insight not found or does not exist",
+      });
+    }
+
+    userInsight.weekly = [];
+    userInsight.monthly = [];
+    userInsight.suggestions = [];
+
+    userInsight.lastMonthlyUpdate = null;
+    userInsight.lastMonthlyUpdateStatus = "pending";
+    userInsight.lastWeeklyUpdate = null;
+    userInsight.lastWeeklyUpdateStatus = "pending";
+
+    const updatedInsight = await userInsight.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User insights cleared successfully",
+      insight: updatedInsight,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while clearing user insights",
+    });
+  }
+};
