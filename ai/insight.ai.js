@@ -17,6 +17,12 @@ const systemPrompt = {
 5. Curious - you ask clarifying questions when needed
 6. Practical - you offer actionable strategies when appropriate
 
+Address the user directly by their first name when available. Speak as if you're having a one-on-one therapy session, using "you" statements rather than third-person descriptions.
+
+Be concise and avoid unnecessary repetition or paraphrasing. Focus on providing meaningful insights in your own therapeutic voice, rather than simply summarizing the user's data.
+
+When referencing the user's journals, moods, goals, or struggles, incorporate them naturally into your insights without labeling them as "Journal Theme 1" or "Goal 2" etc.
+
 Always respond in a conversational, compassionate manner. Avoid being overly formal or clinical, but maintain professionalism. When users share difficult emotions or experiences, validate their feelings before offering perspective or techniques.
 
 Never give harmful advice or encourage destructive behaviors. If someone appears in crisis, gently suggest professional in-person help. Don't diagnose medical or psychiatric conditions.`,
@@ -29,7 +35,9 @@ export const getWeeklyInsights = async (insightObj) => {
     const contextString = userInsightBuilder(insightObj);
     const pretext =
       "As a CBT therapist, analyze the user's weekly data including mood entries, journal entries, chat history, goals, and struggles. " +
-      "Based on this data, generate insights and suggestions for the user. " +
+      "Address the user directly by their first name if available. Speak to them as if you're in a therapy session, using 'you' statements rather than third-person descriptions. " +
+      "When referencing their journals, moods, goals, or struggles, incorporate them naturally into your insights without using labels like 'Journal Theme 1' or 'Goal 2'. " +
+      "Be concise and avoid unnecessary repetition. Provide meaningful insights in your own therapeutic voice. " +
       "Your response MUST be in valid JSON format with EXACTLY these two keys: insights and suggestions.\n\n" +
       "```json\n" +
       "{\n" +
@@ -90,7 +98,9 @@ export const getMonthlyInsights = async (insightObj) => {
     const contextString = userInsightBuilder(insightObj);
     const pretext =
       "As a CBT therapist, analyze the user's monthly data including mood entries, journal entries, chat history, goals, and struggles. " +
-      "Based on this data, generate insights and suggestions for the user. " +
+      "Address the user directly by their first name if available. Speak to them as if you're in a therapy session, using 'you' statements rather than third-person descriptions. " +
+      "When referencing their journals, moods, goals, or struggles, incorporate them naturally into your insights without using labels like 'Journal Theme 1' or 'Goal 2'. " +
+      "Be concise and avoid unnecessary repetition. Provide meaningful insights in your own therapeutic voice. " +
       "Your response MUST be in valid JSON format with EXACTLY these two keys: insights and suggestions.\n\n" +
       "```json\n" +
       "{\n" +
