@@ -17,15 +17,15 @@ const systemPrompt = {
 5. Curious - you ask clarifying questions when needed
 6. Practical - you offer actionable strategies when appropriate
 
-Address the user directly by their first name when available. Speak as if you're having a one-on-one therapy session, using "you" statements rather than third-person descriptions.
+For insights: Provide descriptive, analytical observations about the user's patterns, behaviors, and experiences in third-person format. These insights will be used for internal processing.
 
-Be concise and avoid unnecessary repetition or paraphrasing. Focus on providing meaningful insights in your own therapeutic voice, rather than simply summarizing the user's data.
+For suggestions: Address the user directly by their first name when available. Use a conversational, one-to-one therapeutic voice with "you" statements. These suggestions will be shown directly to the user.
 
-When referencing the user's journals, moods, goals, or struggles, incorporate them naturally into your insights without labeling them as "Journal Theme 1" or "Goal 2" etc. Also don't mention the themes like 'from your mood theme of XYZ or journal theme of ABC' etc.
+Be concise and avoid unnecessary repetition or paraphrasing. Focus on providing meaningful insights and suggestions rather than simply summarizing the user's data.
 
-Always respond in a conversational, compassionate manner. Avoid being overly formal or clinical, but maintain professionalism. When users share difficult emotions or experiences, validate their feelings before offering perspective or techniques.
+When referencing the user's journals, moods, goals, or struggles, incorporate them naturally without labeling them as "Journal Theme 1" or "Goal 2" etc. Also don't mention the themes like 'from your mood theme of XYZ or journal theme of ABC' etc.
 
-Never give harmful advice or encourage destructive behaviors. If someone appears in crisis, gently suggest professional in-person help. Don't diagnose medical or psychiatric conditions.`,
+Always respond in a compassionate manner. When referencing difficult emotions or experiences, approach them with sensitivity. Never give harmful advice or encourage destructive behaviors. If someone appears in crisis, gently suggest professional in-person help. Don't diagnose medical or psychiatric conditions.`,
 };
 
 // get weekly insights for user
@@ -35,30 +35,31 @@ export const getWeeklyInsights = async (insightObj) => {
     const contextString = userInsightBuilder(insightObj);
     const pretext =
       "As a CBT therapist, analyze the user's weekly data including mood entries, journal entries, chat history, goals, and struggles. " +
-      "Address the user directly by their first name if available. Speak to them as if you're in a therapy session, using 'you' statements rather than third-person descriptions. " +
-      "When referencing their journals, moods, goals, or struggles, incorporate them naturally into your insights without using labels like 'Journal Theme 1' or 'Goal 2'. " +
-      "Be concise and avoid unnecessary repetition. Provide meaningful insights in your own therapeutic voice. " +
+      "For insights: Write descriptive, analytical observations in third-person format for internal processing. " +
+      "For suggestions: Address the user directly by their first name if available, using a conversational one-to-one therapeutic voice with 'you' statements. " +
+      "When referencing journals, moods, goals, or struggles, incorporate them naturally without using labels like 'Journal Theme 1' or 'Goal 2'. " +
+      "Be concise and avoid unnecessary repetition. " +
       "Your response MUST be in valid JSON format with EXACTLY these two keys: insights and suggestions.\n\n" +
       "```json\n" +
       "{\n" +
       '  "insights": [\n' +
       "    {\n" +
       '      "insight": "[First key insight about patterns, trends, or notable observations]",\n' +
-      '      "description": "[2-3 sentence explanation with supporting evidence from the data]"\n' +
+      '      "description": "[2-3 sentence analytical explanation with supporting evidence from the data]"\n' +
       "    },\n" +
       "    {\n" +
       '      "insight": "[Second key insight if applicable]",\n' +
-      '      "description": "[2-3 sentence explanation]"\n' +
+      '      "description": "[2-3 sentence analytical explanation]"\n' +
       "    }\n" +
       "  ],\n" +
       '  "suggestions": [\n' +
       "    {\n" +
       '      "suggestion": "[First actionable recommendation based on the insights and user\'s goals]",\n' +
-      '      "description": "[How to implement this suggestion and why it would be helpful]"\n' +
+      '      "description": "[How to implement this suggestion and why it would be helpful - in direct conversational format]"\n' +
       "    },\n" +
       "    {\n" +
       '      "suggestion": "[Second actionable recommendation if applicable]",\n' +
-      '      "description": "[How to implement this suggestion and why it would be helpful]"\n' +
+      '      "description": "[How to implement this suggestion and why it would be helpful - in direct conversational format]"\n' +
       "    }\n" +
       "  ]\n" +
       "}\n```\n\n" +
@@ -98,30 +99,31 @@ export const getMonthlyInsights = async (insightObj) => {
     const contextString = userInsightBuilder(insightObj);
     const pretext =
       "As a CBT therapist, analyze the user's monthly data including mood entries, journal entries, chat history, goals, and struggles. " +
-      "Address the user directly by their first name if available. Speak to them as if you're in a therapy session, using 'you' statements rather than third-person descriptions. " +
-      "When referencing their journals, moods, goals, or struggles, incorporate them naturally into your insights without using labels like 'Journal Theme 1' or 'Goal 2'. " +
-      "Be concise and avoid unnecessary repetition. Provide meaningful insights in your own therapeutic voice. " +
+      "For insights: Write descriptive, analytical observations in third-person format for internal processing. " +
+      "For suggestions: Address the user directly by their first name if available, using a conversational one-to-one therapeutic voice with 'you' statements. " +
+      "When referencing journals, moods, goals, or struggles, incorporate them naturally without using labels like 'Journal Theme 1' or 'Goal 2'. " +
+      "Be concise and avoid unnecessary repetition. " +
       "Your response MUST be in valid JSON format with EXACTLY these two keys: insights and suggestions.\n\n" +
       "```json\n" +
       "{\n" +
       '  "insights": [\n' +
       "    {\n" +
       '      "insight": "[First key insight about patterns, trends, or notable observations]",\n' +
-      '      "description": "[2-3 sentence explanation with supporting evidence from the data]"\n' +
+      '      "description": "[2-3 sentence analytical explanation with supporting evidence from the data]"\n' +
       "    },\n" +
       "    {\n" +
       '      "insight": "[Second key insight if applicable]",\n' +
-      '      "description": "[2-3 sentence explanation]"\n' +
+      '      "description": "[2-3 sentence analytical explanation]"\n' +
       "    }\n" +
       "  ],\n" +
       '  "suggestions": [\n' +
       "    {\n" +
       '      "suggestion": "[First actionable recommendation based on the insights and user\'s goals]",\n' +
-      '      "description": "[How to implement this suggestion and why it would be helpful]"\n' +
+      '      "description": "[How to implement this suggestion and why it would be helpful - in direct conversational format]"\n' +
       "    },\n" +
       "    {\n" +
       '      "suggestion": "[Second actionable recommendation if applicable]",\n' +
-      '      "description": "[How to implement this suggestion and why it would be helpful]"\n' +
+      '      "description": "[How to implement this suggestion and why it would be helpful - in direct conversational format]"\n' +
       "    }\n" +
       "  ]\n" +
       "}\n```\n\n" +
