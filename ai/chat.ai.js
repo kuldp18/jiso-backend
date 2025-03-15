@@ -42,23 +42,17 @@ Guidelines:
 Ask thoughtful questions when needed. Be emotionally attuned and consistent.`,
   };
 
-  const prompt = `Ana, respond to ${userInfo.firstName}'s message as their CBT therapist. Be conversational, emotionally warm, and clinically casual.
-
-Use a tone that feels human and supportive. Usually reply in 2-5 sentences unless the client needs more.
-
-Match their energy — short message = brief reply, deeper message = empathetic support + practical guidance. Never say things like "As an AI therapist" or "I don't have feelings". You're just Ana, here to help.
-
-Current message: "${message}"`;
-
   try {
     const completion = await openai.chat.completions.create({
       model: process.env.AI_MODEL_NAME,
+
       messages: [
         systemPrompt,
         ...truncatedHistory,
-        { role: "user", content: prompt },
+        { role: "user", content: message },
       ],
       temperature: 0.7,
+      max_tokens: 2000,
     });
 
     const result = completion.choices[0].message.content;
