@@ -10,14 +10,27 @@ export const userContextBuilder = (contextObj) => {
   userInfoString += `Age: ${age}\n`;
   userInfoString += `Gender: ${gender}\n\n`;
 
+  // each goal has a goal and description
+  const parsedUserGoals = goals.map(
+    (goal) => `${goal.goal}: ${goal?.description || "no goal description"}\n`
+  );
+
+  // each struggle has a struggle and description and severity
+  const parsedUserStruggles = struggles.map(
+    (struggle) =>
+      `${struggle.struggle}: ${
+        struggle?.description || "no struggle description"
+      } (severity(ignore if -1): ${struggle.severity})\n`
+  );
+
   const userGoalsString =
-    goals.length > 0
-      ? `User Goals: ${goals?.join(", ")}\n`
+    parsedUserGoals.length > 0
+      ? `User Goals: ${parsedUserGoals.join("")}\n\n`
       : "User Goals: None\n";
 
   const userStrugglesString =
-    struggles.length > 0
-      ? `User Struggles: ${struggles?.join(", ")}\n\n`
+    parsedUserStruggles.length > 0
+      ? `User Struggles: ${parsedUserStruggles.join("")}\n\n`
       : "User Struggles: None\n\n";
 
   // Format mood data
