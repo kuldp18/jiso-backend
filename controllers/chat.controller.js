@@ -56,7 +56,10 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    const chat = await Chat.findById(chatId);
+    const chat = await Chat.findById(chatId).populate({
+      path: "userId",
+      select: "firstName lastName age gender",
+    });
 
     if (!chat) {
       return res.status(404).json({
@@ -76,13 +79,19 @@ export const sendMessage = async (req, res) => {
 
     // create a history of messages for AI
     const history = chat.messages.map((msg) => ({
-      role: msg.sender,
+      role: msg.sender === "ai" ? "Ana" : "User",
       content: msg.content,
     }));
 
     // ask AI for response
 
-    const therapistResponse = await getChatResponse(message, history);
+    const userInfo = {
+      firstName: chat.userId.firstName || null,
+      lastName: chat.userId.lastName || null,
+      age: chat.userId.age || null,
+    };
+
+    const therapistResponse = await getChatResponse(message, history, userInfo);
 
     if (!therapistResponse) {
       return res.status(500).json({
