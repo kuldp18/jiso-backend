@@ -79,7 +79,7 @@ export const sendMessage = async (req, res) => {
 
     // create a history of messages for AI
     const history = chat.messages.map((msg) => ({
-      role: msg.sender === "ai" ? "Ana" : "User",
+      role: msg.sender === "ai" ? "assistant" : "user",
       content: msg.content,
     }));
 
@@ -89,6 +89,7 @@ export const sendMessage = async (req, res) => {
       firstName: chat.userId.firstName || null,
       lastName: chat.userId.lastName || null,
       age: chat.userId.age || null,
+      gender: chat.userId.gender || null,
     };
 
     const therapistResponse = await getChatResponse(message, history, userInfo);
