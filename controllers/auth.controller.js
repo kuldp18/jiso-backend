@@ -450,12 +450,16 @@ export const checkAuth = async (req, res) => {
         id: user.id,
         name: user.fullName,
         email: user.email,
-        isEmailVerified: user.isEmailVerified,
+        gender: user.gender,
+        age: user.age,
+        authenticated: true,
+        verified: user.isEmailVerified,
       },
     });
   } catch (error) {
     res.status(401).json({
-      success: true,
+      success: false,
+      authenticated: false,
       message: "User is not authenticated",
     });
   }
