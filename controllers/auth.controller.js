@@ -258,6 +258,8 @@ export const verifyEmail = async (req, res) => {
         id: user._id,
         name: user.fullName,
         email: user.email,
+        gender: user.gender,
+        age: user.age,
         verified: user.isEmailVerified,
       },
     });
