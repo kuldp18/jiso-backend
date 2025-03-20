@@ -115,12 +115,9 @@ export const login = async (req, res) => {
     }
 
     // check if the user is already logged in
-    const userRefreshToken = req.cookies?.refreshToken;
-    if (userRefreshToken) {
-      const decoded = jwt.verify(
-        userRefreshToken,
-        process.env.JWT_REFRESH_SECRET
-      );
+    const accessToken = req.cookies?.token;
+    if (accessToken) {
+      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
       if (decoded) {
         return res.status(400).json({
           success: "false",
