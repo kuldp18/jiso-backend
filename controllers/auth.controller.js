@@ -164,6 +164,7 @@ export const login = async (req, res) => {
         name: user.fullName,
         gender: user.gender,
         age: user.age,
+        verified: user.isEmailVerified,
       },
     });
   } catch (error) {
