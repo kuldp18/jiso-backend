@@ -4,6 +4,7 @@ import {
   createJournalTheme,
   createMoodTheme,
   getUserContext,
+  updateUserContext,
 } from "../controllers/userContext.controller.js";
 
 import {
@@ -38,6 +39,7 @@ router.use(verifyToken);
  * Handles basic user context operations
  */
 router.get("/", getUserContext);
+router.patch("/update", updateUserContext);
 
 /**
  * Goal Routes

@@ -15,6 +15,56 @@ export const createDefaultUserContext = async (userId) => {
   }
 };
 
+// update user context: onboarding
+export const updateUserContext = async (req, res) => {
+  const { goals, struggles } = req.body;
+
+  if (!Array.isArray(goals) || !Array.isArray(struggles)) {
+    return res.status(400).json({
+      success: false,
+      message: "Goals and struggles should be arrays",
+    });
+  }
+
+  if (goals.length === 0 && struggles.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Goals and struggles should not be empty",
+    });
+  }
+
+  try {
+    const userContext = await UserContext.findOne({ userId: req.userId });
+    if (!userContext) {
+      return res.status(404).json({
+        success: false,
+        message: "No context for this user found",
+      });
+    }
+
+    if (goals.length > 0) {
+      userContext.goals = goals;
+    }
+
+    if (struggles.length > 0) {
+      userContext.struggles = struggles;
+    }
+
+    const updatedContext = await userContext.save();
+    res.status(200).json({
+      success: true,
+      message: "User context updated successfully",
+      context: updatedContext,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message || "Something went wrong while updating user context",
+    });
+  }
+};
+
 // get user context
 export const getUserContext = async (req, res) => {
   try {
