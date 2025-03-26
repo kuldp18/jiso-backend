@@ -8,6 +8,7 @@ import {
   createChat,
   getChat,
   sendMessage,
+  getChats,
 } from "../controllers/chat.controller.js";
 
 const router = Router();
@@ -16,6 +17,7 @@ const router = Router();
 router.use(verifyToken, requireVerifiedEmail);
 
 router.get("/new", createChat); // create new chat
+router.get("/", getChats); // get all chats for the user
 router.get("/:chatId", getChat); // get chat by id
 router.post("/:chatId/send", sendMessage); // send new message to AI
 

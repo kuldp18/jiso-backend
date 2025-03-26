@@ -158,3 +158,32 @@ export const getChat = async (req, res) => {
     });
   }
 };
+
+// get all user chats
+export const getChats = async (req, res) => {
+  try {
+    const chats = await Chat.find({
+      userId: req.userId,
+    });
+
+    if (!chats || chats.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No chats found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Chats found successfully.",
+      chats,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Something went wrong while getting chats of the user.",
+    });
+  }
+};
