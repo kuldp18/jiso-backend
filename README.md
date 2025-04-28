@@ -101,16 +101,19 @@ npm install
 3. Create a `.env` file with the following variables:
 
 ```
-PORT=8888
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-CLIENT_URL=your_frontend_url
-AI_SERVICE_ENDPOINT=http://localhost:11434/v1
-AI_SERVICE_APIKEY=ollama
-AI_MODEL_NAME=qwen2:7b
-CRON_API_KEY=your_cron_api_key
-# Email configuration
-MAILERSEND_API_KEY=your_mailersend_api_key
+
+PORT=8888                                      # Port the server will run on
+NODE_ENV=development                           # Environment (development, production)
+MONGO_URI=your_mongodb_connection_string       # MongoDB connection URL
+JWT_SECRET=your_jwt_secret                     # Secret for JWT tokens
+JWT_REFRESH_SECRET=your_refresh_secret         # Secret for JWT refresh tokens
+CLIENT_URL=http://localhost:5173               # URL to your frontend application
+AI_SERVICE_ENDPOINT=http://localhost:11434/v1  # Endpoint for LLM API (Ollama default)
+AI_SERVICE_APIKEY=ollama                       # API key for AI service
+AI_MODEL_NAME=qwen2:7b                         # Model name to use
+MAILERSEND_API_KEY=your_mailersend_api_key     # API key for MailerSend
+EMAIL_DOMAIN_NAME=your_email_domain            # Email domain for sending emails
+CRON_API_KEY=test                              # A strong password with minimum 10-15 characters
 ```
 
 4. Start the development server
