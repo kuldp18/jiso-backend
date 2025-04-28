@@ -5,6 +5,7 @@ import moodRoutes from "./mood.route.js";
 import insightRoutes from "./insight.route.js";
 import cronRoutes from "./cron.route.js";
 import chatRoutes from "./chat.route.js";
+import dashboardRoutes from "./dashboard.route.js";
 
 export {
   authRoutes,
@@ -14,4 +15,5 @@ export {
   insightRoutes,
   cronRoutes,
   chatRoutes,
+  dashboardRoutes,
 };

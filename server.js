@@ -12,6 +12,7 @@ import {
   insightRoutes,
   cronRoutes,
   chatRoutes,
+  dashboardRoutes,
 } from "./routes/index.js";
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use("/api/v1/moods", moodRoutes);
 app.use("/api/v1/insights", insightRoutes);
 app.use("/api/v1/chats", chatRoutes);
 app.use("/api/v1/cron", cronRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 const PORT = process.env.PORT || 8888;
 
