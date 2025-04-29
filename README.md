@@ -30,9 +30,9 @@ Jiso uses Qwen 2.5 7B, an open-source LLM from Alibaba Cloud, to power its AI ca
 For local development or deployments without external AI services, we recommend using [Ollama](https://ollama.ai/) to run the Qwen 2.5 7B model locally:
 
 1. Install Ollama from [ollama.ai](https://ollama.ai/)
-2. Pull the Qwen 2.5 7B model:
+2. Pull or Run the Qwen 2.5 7B model:
    ```bash
-   ollama pull qwen2:7b
+   ollama run qwen2.5
    ```
 3. Configure your `.env` file to use Ollama's API:
    ```
